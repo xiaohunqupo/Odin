@@ -1404,12 +1404,21 @@ bool allow_token(AstFile *f, TokenKind kind) {
 	return false;
 }
 
+bool is_strict_style(AstFile *f) {
+	if (build_context.strict_style) {
+		return true;
+	} else if (build_context.strict_style_init_only && f->pkg->kind == Package_Init) {
+		return true;	
+	}
+	return false;
+}
+
 Token expect_closing_brace_of_field_list(AstFile *f) {
 	Token token = f->curr_token;
 	if (allow_token(f, Token_CloseBrace)) {
 		return token;
 	}
-	if (allow_token(f, Token_Semicolon)) {
+	if (allow_token(f, Token_Semicolon) && is_strict_style(f)) {
 		String p = token_to_string(token);
 		syntax_error(token_end_of_line(f, f->prev_token), "Expected a comma, got a %.*s", LIT(p));
 	}
@@ -1514,9 +1523,7 @@ void assign_removal_flag_to_semicolon(AstFile *f) {
 		}
 			
 		if (ok) {
-			if (build_context.strict_style) {
-				syntax_error(*prev_token, "Found unneeded semicolon");
-			} else if (build_context.strict_style_init_only && f->pkg->kind == Package_Init) {
+			if (is_strict_style(f)) {
 				syntax_error(*prev_token, "Found unneeded semicolon");
 			}
 			prev_token->flags |= TokenFlag_Remove;
@@ -1664,6 +1671,9 @@ Ast *parse_literal_value(AstFile *f, Ast *type) {
 	Token open = expect_token(f, Token_OpenBrace);
 	isize expr_level = f->expr_level;
 	f->expr_level = 0;
+	if (!is_strict_style(f)) {
+		f->expr_level = 1;
+	}
 	if (f->curr_token.kind != Token_CloseBrace) {
 		elems = parse_element_list(f);
 	}
@@ -2322,7 +2332,7 @@ Ast *parse_operand(AstFile *f, bool lhs) {
 
 		skip_possible_newline_for_literal(f);
 		Token open = expect_token_after(f, Token_OpenBrace, "struct");
-
+		
 		isize name_count = 0;
 		Ast *fields = parse_struct_field_list(f, &name_count);
 		Token close = expect_closing_brace_of_field_list(f);
@@ -2562,8 +2572,8 @@ Ast *parse_call_expr(AstFile *f, Ast *operand) {
 
 	isize prev_expr_level = f->expr_level;
 	bool prev_allow_newline = f->allow_newline;
-	f->expr_level = 0;
 	f->allow_newline = true;
+	f->expr_level = !is_strict_style(f);
 
 	open_paren = expect_token(f, Token_OpenParen);
 
@@ -3542,7 +3552,7 @@ bool parse_expect_field_separator(AstFile *f, Ast *param) {
 	if (allow_token(f, Token_Comma)) {
 		return true;
 	}
-	if (token.kind == Token_Semicolon) {
+	if (token.kind == Token_Semicolon && is_strict_style(f)) {
 		String p = token_to_string(token);
 		syntax_error(token_end_of_line(f, f->prev_token), "Expected a comma, got a %.*s", LIT(p));
 		advance_token(f);
