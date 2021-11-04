@@ -1,5 +1,6 @@
 package linalg
 
+import "core:builtin"
 import "core:math"
 import "core:intrinsics"
 
@@ -30,6 +31,7 @@ DEG_PER_RAD :: 360.0/TAU
 
 
 @private IS_NUMERIC :: intrinsics.type_is_numeric
+@private IS_MATRIX :: intrinsics.type_is_matrix
 @private IS_QUATERNION :: intrinsics.type_is_quaternion
 @private IS_ARRAY :: intrinsics.type_is_array
 @private IS_FLOAT :: intrinsics.type_is_float
@@ -156,72 +158,38 @@ projection :: proc(x, normal: $T/[$N]$E) -> T where IS_NUMERIC(E) {
 	return dot(x, normal) / dot(normal, normal) * normal
 }
 
-identity :: proc($T: typeid/[$N][N]$E) -> (m: T) #no_bounds_check {
-	for i in 0..<N {
-		m[i][i] = E(1)
-	}
-	return m
+identity :: proc($T: typeid/matrix[$N, N]$E) -> (m: T) #no_bounds_check {
+	return 1
 }
 
-trace :: proc(m: $T/[$N][N]$E) -> (tr: E) {
+trace :: proc(m: $T/matrix[$N, N]$E) -> (tr: E) {
 	for i in 0..<N {
-		tr += m[i][i]
+		tr += m[i, i]
 	}
 	return
 }
 
-transpose :: proc(a: $T/[$N][$M]$E) -> (m: (T when N == M else [M][N]E)) #no_bounds_check {
-	for j in 0..<M {
-		for i in 0..<N {
-			m[j][i] = a[i][j]
-		}
-	}
-	return
-}
+transpose :: builtin.transpose
 
-matrix_mul :: proc(a, b: $M/[$N][N]$E) -> (c: M)
+matrix_mul :: proc(a, b: $M/matrix[$N, N]$E) -> (c: M)
 	where !IS_ARRAY(E), IS_NUMERIC(E) #no_bounds_check {
-	for i in 0..<N {
-		for k in 0..<N {
-			for j in 0..<N {
-				c[k][i] += a[j][i] * b[k][j]
-			}
-		}
-	}
-	return
+	return a * b
 }
 
-matrix_comp_mul :: proc(a, b: $M/[$J][$I]$E) -> (c: M)
+matrix_comp_mul :: proc(a, b: $M/matrix[$I, $J]$E) -> (c: M)
 	where !IS_ARRAY(E), IS_NUMERIC(E) #no_bounds_check {
-	for j in 0..<J {
-		for i in 0..<I {
-			c[j][i] = a[j][i] * b[j][i]
-		}
-	}
-	return
+	return hadamard_prodoct(a, b)
 }
 
-matrix_mul_differ :: proc(a: $A/[$J][$I]$E, b: $B/[$K][J]E) -> (c: [K][I]E)
+matrix_mul_differ :: proc(a: $A/matrix[$I, $J]$E, b: $B/matrix[J, $K]E) -> (c: [K][I]E)
 	where !IS_ARRAY(E), IS_NUMERIC(E), I != K #no_bounds_check {
-	for k in 0..<K {
-		for j in 0..<J {
-			for i in 0..<I {
-				c[k][i] += a[j][i] * b[k][j]
-			}
-		}
-	}
-	return
+	return a * b
 }
 
 
-matrix_mul_vector :: proc(a: $A/[$I][$J]$E, b: $B/[I]E) -> (c: B)
+matrix_mul_vector :: proc(a: $A/matrix[$I, $J]$E, b: $B/[J]E) -> (c: B)
 	where !IS_ARRAY(E), IS_NUMERIC(E) #no_bounds_check {
-	for i in 0..<I {
-		for j in 0..<J {
-			c[j] += a[i][j] * b[i]
-		}
-	}
-	return
+	return a * b
 }
 
 quaternion_mul_quaternion :: proc(q1, q2: $Q) -> Q where IS_QUATERNION(Q) {
@@ -270,8 +238,8 @@ mul :: proc{
 vector_to_ptr :: proc(v: ^$V/[$N]$E) -> ^E where IS_NUMERIC(E), N > 0 #no_bounds_check {
 	return &v[0]
 }
-matrix_to_ptr :: proc(m: ^$A/[$I][$J]$E) -> ^E where IS_NUMERIC(E), I > 0, J > 0 #no_bounds_check {
-	return &m[0][0]
+matrix_to_ptr :: proc(m: ^$A/matrix[$M, $N]$E) -> ^E where IS_NUMERIC(E), I > 0, J > 0 #no_bounds_check {
+	return &m[0, 0]
 }
 
 to_ptr :: proc{vector_to_ptr, matrix_to_ptr}

@@ -10,25 +10,25 @@ Vector2f16 :: distinct [2]f16
 Vector3f16 :: distinct [3]f16
 Vector4f16 :: distinct [4]f16
 
-Matrix1x1f16 :: distinct [1][1]f16
-Matrix1x2f16 :: distinct [1][2]f16
-Matrix1x3f16 :: distinct [1][3]f16
-Matrix1x4f16 :: distinct [1][4]f16
+Matrix1x1f16 :: distinct matrix[1, 1]f16
+Matrix1x2f16 :: distinct matrix[1, 2]f16
+Matrix1x3f16 :: distinct matrix[1, 3]f16
+Matrix1x4f16 :: distinct matrix[1, 4]f16
 
-Matrix2x1f16 :: distinct [2][1]f16
-Matrix2x2f16 :: distinct [2][2]f16
-Matrix2x3f16 :: distinct [2][3]f16
-Matrix2x4f16 :: distinct [2][4]f16
+Matrix2x1f16 :: distinct matrix[2, 1]f16
+Matrix2x2f16 :: distinct matrix[2, 2]f16
+Matrix2x3f16 :: distinct matrix[2, 3]f16
+Matrix2x4f16 :: distinct matrix[2, 4]f16
 
-Matrix3x1f16 :: distinct [3][1]f16
-Matrix3x2f16 :: distinct [3][2]f16
-Matrix3x3f16 :: distinct [3][3]f16
-Matrix3x4f16 :: distinct [3][4]f16
+Matrix3x1f16 :: distinct matrix[3, 1]f16
+Matrix3x2f16 :: distinct matrix[3, 2]f16
+Matrix3x3f16 :: distinct matrix[3, 3]f16
+Matrix3x4f16 :: distinct matrix[3, 4]f16
 
-Matrix4x1f16 :: distinct [4][1]f16
-Matrix4x2f16 :: distinct [4][2]f16
-Matrix4x3f16 :: distinct [4][3]f16
-Matrix4x4f16 :: distinct [4][4]f16
+Matrix4x1f16 :: distinct matrix[4, 1]f16
+Matrix4x2f16 :: distinct matrix[4, 2]f16
+Matrix4x3f16 :: distinct matrix[4, 3]f16
+Matrix4x4f16 :: distinct matrix[4, 4]f16
 
 Matrix1f16 :: Matrix1x1f16
 Matrix2f16 :: Matrix2x2f16
@@ -39,25 +39,25 @@ Vector2f32 :: distinct [2]f32
 Vector3f32 :: distinct [3]f32
 Vector4f32 :: distinct [4]f32
 
-Matrix1x1f32 :: distinct [1][1]f32
-Matrix1x2f32 :: distinct [1][2]f32
-Matrix1x3f32 :: distinct [1][3]f32
-Matrix1x4f32 :: distinct [1][4]f32
+Matrix1x1f32 :: distinct matrix[1, 1]f32
+Matrix1x2f32 :: distinct matrix[1, 2]f32
+Matrix1x3f32 :: distinct matrix[1, 3]f32
+Matrix1x4f32 :: distinct matrix[1, 4]f32
 
-Matrix2x1f32 :: distinct [2][1]f32
-Matrix2x2f32 :: distinct [2][2]f32
-Matrix2x3f32 :: distinct [2][3]f32
-Matrix2x4f32 :: distinct [2][4]f32
+Matrix2x1f32 :: distinct matrix[2, 1]f32
+Matrix2x2f32 :: distinct matrix[2, 2]f32
+Matrix2x3f32 :: distinct matrix[2, 3]f32
+Matrix2x4f32 :: distinct matrix[2, 4]f32
 
-Matrix3x1f32 :: distinct [3][1]f32
-Matrix3x2f32 :: distinct [3][2]f32
-Matrix3x3f32 :: distinct [3][3]f32
-Matrix3x4f32 :: distinct [3][4]f32
+Matrix3x1f32 :: distinct matrix[3, 1]f32
+Matrix3x2f32 :: distinct matrix[3, 2]f32
+Matrix3x3f32 :: distinct matrix[3, 3]f32
+Matrix3x4f32 :: distinct matrix[3, 4]f32
 
-Matrix4x1f32 :: distinct [4][1]f32
-Matrix4x2f32 :: distinct [4][2]f32
-Matrix4x3f32 :: distinct [4][3]f32
-Matrix4x4f32 :: distinct [4][4]f32
+Matrix4x1f32 :: distinct matrix[4, 1]f32
+Matrix4x2f32 :: distinct matrix[4, 2]f32
+Matrix4x3f32 :: distinct matrix[4, 3]f32
+Matrix4x4f32 :: distinct matrix[4, 4]f32
 
 Matrix1f32 :: Matrix1x1f32
 Matrix2f32 :: Matrix2x2f32
@@ -68,25 +68,25 @@ Vector2f64 :: distinct [2]f64
 Vector3f64 :: distinct [3]f64
 Vector4f64 :: distinct [4]f64
 
-Matrix1x1f64 :: distinct [1][1]f64
-Matrix1x2f64 :: distinct [1][2]f64
-Matrix1x3f64 :: distinct [1][3]f64
-Matrix1x4f64 :: distinct [1][4]f64
+Matrix1x1f64 :: distinct matrix[1, 1]f64
+Matrix1x2f64 :: distinct matrix[1, 2]f64
+Matrix1x3f64 :: distinct matrix[1, 3]f64
+Matrix1x4f64 :: distinct matrix[1, 4]f64
 
-Matrix2x1f64 :: distinct [2][1]f64
-Matrix2x2f64 :: distinct [2][2]f64
-Matrix2x3f64 :: distinct [2][3]f64
-Matrix2x4f64 :: distinct [2][4]f64
+Matrix2x1f64 :: distinct matrix[2, 1]f64
+Matrix2x2f64 :: distinct matrix[2, 2]f64
+Matrix2x3f64 :: distinct matrix[2, 3]f64
+Matrix2x4f64 :: distinct matrix[2, 4]f64
 
-Matrix3x1f64 :: distinct [3][1]f64
-Matrix3x2f64 :: distinct [3][2]f64
-Matrix3x3f64 :: distinct [3][3]f64
-Matrix3x4f64 :: distinct [3][4]f64
+Matrix3x1f64 :: distinct matrix[3, 1]f64
+Matrix3x2f64 :: distinct matrix[3, 2]f64
+Matrix3x3f64 :: distinct matrix[3, 3]f64
+Matrix3x4f64 :: distinct matrix[3, 4]f64
 
-Matrix4x1f64 :: distinct [4][1]f64
-Matrix4x2f64 :: distinct [4][2]f64
-Matrix4x3f64 :: distinct [4][3]f64
-Matrix4x4f64 :: distinct [4][4]f64
+Matrix4x1f64 :: distinct matrix[4, 1]f64
+Matrix4x2f64 :: distinct matrix[4, 2]f64
+Matrix4x3f64 :: distinct matrix[4, 3]f64
+Matrix4x4f64 :: distinct matrix[4, 4]f64
 
 Matrix1f64 :: Matrix1x1f64
 Matrix2f64 :: Matrix2x2f64
@@ -97,20 +97,20 @@ Quaternionf16 :: distinct quaternion64
 Quaternionf32 :: distinct quaternion128
 Quaternionf64 :: distinct quaternion256
 
-MATRIX1F16_IDENTITY :: Matrix1f16{{1}}
-MATRIX2F16_IDENTITY :: Matrix2f16{{1, 0}, {0, 1}}
-MATRIX3F16_IDENTITY :: Matrix3f16{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}
-MATRIX4F16_IDENTITY :: Matrix4f16{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}
+MATRIX1F16_IDENTITY :: Matrix1f16(1)
+MATRIX2F16_IDENTITY :: Matrix2f16(1)
+MATRIX3F16_IDENTITY :: Matrix3f16(1)
+MATRIX4F16_IDENTITY :: Matrix4f16(1)
 
-MATRIX1F32_IDENTITY :: Matrix1f32{{1}}
-MATRIX2F32_IDENTITY :: Matrix2f32{{1, 0}, {0, 1}}
-MATRIX3F32_IDENTITY :: Matrix3f32{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}
-MATRIX4F32_IDENTITY :: Matrix4f32{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}
+MATRIX1F32_IDENTITY :: Matrix1f32(1)
+MATRIX2F32_IDENTITY :: Matrix2f32(1)
+MATRIX3F32_IDENTITY :: Matrix3f32(1)
+MATRIX4F32_IDENTITY :: Matrix4f32(1)
 
-MATRIX1F64_IDENTITY :: Matrix1f64{{1}}
-MATRIX2F64_IDENTITY :: Matrix2f64{{1, 0}, {0, 1}}
-MATRIX3F64_IDENTITY :: Matrix3f64{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}
-MATRIX4F64_IDENTITY :: Matrix4f64{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}
+MATRIX1F64_IDENTITY :: Matrix1f64(1)
+MATRIX2F64_IDENTITY :: Matrix2f64(1)
+MATRIX3F64_IDENTITY :: Matrix3f64(1)
+MATRIX4F64_IDENTITY :: Matrix4f64(1)
 
 QUATERNIONF16_IDENTITY :: Quaternionf16(1)
 QUATERNIONF32_IDENTITY :: Quaternionf32(1)
@@ -558,9 +558,9 @@ quaternion_from_forward_and_up_f16 :: proc(forward, up: Vector3f16) -> Quaternio
 	s := normalize(cross(f, up))
 	u := cross(s, f)
 	m := Matrix3f16{
-		{+s.x, +u.x, -f.x},
-		{+s.y, +u.y, -f.y},
-		{+s.z, +u.z, -f.z},
+		+s.x, +s.y, +s.z,
+		+u.x, +u.y, +u.z,
+		-f.x, -f.y, -f.z,
 	}
 
 	tr := trace(m)
@@ -601,9 +601,9 @@ quaternion_from_forward_and_up_f32 :: proc(forward, up: Vector3f32) -> Quaternio
 	s := normalize(cross(f, up))
 	u := cross(s, f)
 	m := Matrix3f32{
-		{+s.x, +u.x, -f.x},
-		{+s.y, +u.y, -f.y},
-		{+s.z, +u.z, -f.z},
+		+s.x, +s.y, +s.z,
+		+u.x, +u.y, +u.z,
+		-f.x, -f.y, -f.z,
 	}
 
 	tr := trace(m)
@@ -644,9 +644,9 @@ quaternion_from_forward_and_up_f64 :: proc(forward, up: Vector3f64) -> Quaternio
 	s := normalize(cross(f, up))
 	u := cross(s, f)
 	m := Matrix3f64{
-		{+s.x, +u.x, -f.x},
-		{+s.y, +u.y, -f.y},
-		{+s.z, +u.z, -f.z},
+		+s.x, +s.y, +s.z,
+		+u.x, +u.y, +u.z,
+		-f.x, -f.y, -f.z,
 	}
 
 	tr := trace(m)
@@ -1508,9 +1508,9 @@ matrix3_look_at_f16 :: proc(eye, centre, up: Vector3f16) -> Matrix3f16 {
 	s := normalize(cross(f, up))
 	u := cross(s, f)
 	return Matrix3f16{
-		{+s.x, +u.x, -f.x},
-		{+s.y, +u.y, -f.y},
-		{+s.z, +u.z, -f.z},
+		+s.x, +s.y, +s.z,
+		+u.x, +u.y, +u.z,
+		-f.x, -f.y, -f.z,
 	}
 }
 matrix3_look_at_f32 :: proc(eye, centre, up: Vector3f32) -> Matrix3f32 {
@@ -1518,9 +1518,9 @@ matrix3_look_at_f32 :: proc(eye, centre, up: Vector3f32) -> Matrix3f32 {
 	s := normalize(cross(f, up))
 	u := cross(s, f)
 	return Matrix3f32{
-		{+s.x, +u.x, -f.x},
-		{+s.y, +u.y, -f.y},
-		{+s.z, +u.z, -f.z},
+		+s.x, +s.y, +s.z,
+		+u.x, +u.y, +u.z,
+		-f.x, -f.y, -f.z,
 	}
 }
 matrix3_look_at_f64 :: proc(eye, centre, up: Vector3f64) -> Matrix3f64 {
@@ -1528,9 +1528,9 @@ matrix3_look_at_f64 :: proc(eye, centre, up: Vector3f64) -> Matrix3f64 {
 	s := normalize(cross(f, up))
 	u := cross(s, f)
 	return Matrix3f64{
-		{+s.x, +u.x, -f.x},
-		{+s.y, +u.y, -f.y},
-		{+s.z, +u.z, -f.z},
+		+s.x, +s.y, +s.z,
+		+u.x, +u.y, +u.z,
+		-f.x, -f.y, -f.z,
 	}
 }
 matrix3_look_at :: proc{
@@ -1992,10 +1992,10 @@ matrix4_look_at_f16 :: proc(eye, centre, up: Vector3f16, flip_z_axis := true) ->
 	fe := dot(f, eye)
 
 	return {
-		{+s.x, +u.x, -f.x, 0},
-		{+s.y, +u.y, -f.y, 0},
-		{+s.z, +u.z, -f.z, 0},
-		{-dot(s, eye), -dot(u, eye), +fe if flip_z_axis else -fe, 1},
+		+s.x, +s.y, +s.z, -dot(s, eye),
+		+u.x, +u.y, +u.z, -dot(u, eye),
+		-f.x, -f.y, -f.z, +fe if flip_z_axis else -fe,
+		0, 0, 0, 1,
 	}
 }
 matrix4_look_at_f32 :: proc(eye, centre, up: Vector3f32, flip_z_axis := true) -> (m: Matrix4f32) {
@@ -2006,10 +2006,10 @@ matrix4_look_at_f32 :: proc(eye, centre, up: Vector3f32, flip_z_axis := true) ->
 	fe := dot(f, eye)
 
 	return {
-		{+s.x, +u.x, -f.x, 0},
-		{+s.y, +u.y, -f.y, 0},
-		{+s.z, +u.z, -f.z, 0},
-		{-dot(s, eye), -dot(u, eye), +fe if flip_z_axis else -fe, 1},
+		+s.x, +s.y, +s.z, -dot(s, eye),
+		+u.x, +u.y, +u.z, -dot(u, eye),
+		-f.x, -f.y, -f.z, +fe if flip_z_axis else -fe,
+		0, 0, 0, 1,
 	}
 }
 matrix4_look_at_f64 :: proc(eye, centre, up: Vector3f64, flip_z_axis := true) -> (m: Matrix4f64) {
@@ -2020,10 +2020,10 @@ matrix4_look_at_f64 :: proc(eye, centre, up: Vector3f64, flip_z_axis := true) ->
 	fe := dot(f, eye)
 
 	return {
-		{+s.x, +u.x, -f.x, 0},
-		{+s.y, +u.y, -f.y, 0},
-		{+s.z, +u.z, -f.z, 0},
-		{-dot(s, eye), -dot(u, eye), +fe if flip_z_axis else -fe, 1},
+		+s.x, +s.y, +s.z, -dot(s, eye),
+		+u.x, +u.y, +u.z, -dot(u, eye),
+		-f.x, -f.y, -f.z, +fe if flip_z_axis else -fe,
+		0, 0, 0, 1,
 	}
 }
 matrix4_look_at :: proc{
