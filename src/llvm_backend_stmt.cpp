@@ -2031,6 +2031,14 @@ void lb_build_stmt(lbProcedure *p, Ast *node) {
 			out |= StateFlag_no_bounds_check;
 			out &= ~StateFlag_bounds_check;
 		}
+		
+		if (in & StateFlag_fast_math) {
+			out |= StateFlag_fast_math;
+			out &= ~StateFlag_accurate_math;
+		} else if (in & StateFlag_accurate_math) {
+			out |= StateFlag_accurate_math;
+			out &= ~StateFlag_fast_math;
+		}
 
 		p->state_flags = out;
 	}

@@ -144,6 +144,9 @@ struct lbModule {
 	PtrMap<void *, LLVMMetadataRef> debug_values; 
 
 	Array<lbIncompleteDebugType> debug_incomplete_types;
+	
+	LLVMMetadataRef metadata_fast_math;
+	LLVMMetadataRef metadata_accurate_math;
 };
 
 struct lbGenerator {

@@ -1789,6 +1789,8 @@ void parse_proc_tags(AstFile *f, u64 *tags) {
 		ELSE_IF_ADD_TAG(require_results)
 		ELSE_IF_ADD_TAG(bounds_check)
 		ELSE_IF_ADD_TAG(no_bounds_check)
+		ELSE_IF_ADD_TAG(fast_math)
+		ELSE_IF_ADD_TAG(accurate_math)
 		else {
 			syntax_error(tag_expr, "Unknown procedure type tag #%.*s", LIT(tag_name));
 		}
@@ -1798,6 +1800,9 @@ void parse_proc_tags(AstFile *f, u64 *tags) {
 
 	if ((*tags & ProcTag_bounds_check) && (*tags & ProcTag_no_bounds_check)) {
 		syntax_error(f->curr_token, "You cannot apply both #bounds_check and #no_bounds_check to a procedure");
+	}
+	if ((*tags & ProcTag_fast_math) && (*tags & ProcTag_accurate_math)) {
+		syntax_error(f->curr_token, "You cannot apply both #fast_math and #accurate_math to a procedure");
 	}
 }
 
@@ -1946,11 +1951,23 @@ Ast *parse_check_directive_for_statement(Ast *s, Token const &tag_token, u16 sta
 			syntax_error(tag_token, "#bounds_check and #no_bounds_check cannot be applied together");
 		}
 		break;
+	case StateFlag_fast_math:
+		if ((s->state_flags & StateFlag_accurate_math) != 0) {
+			syntax_error(tag_token, "#fast_math and #accurate_math cannot be applied together");
+		}
+		break;
+	case StateFlag_accurate_math:
+		if ((s->state_flags & StateFlag_fast_math) != 0) {
+			syntax_error(tag_token, "#fast_math and #accurate_math cannot be applied together");
+		}
+		break;
 	}
 
 	switch (state_flag) {
 	case StateFlag_bounds_check:
 	case StateFlag_no_bounds_check:
+	case StateFlag_fast_math:
+	case StateFlag_accurate_math:
 		switch (s->kind) {
 		case Ast_BlockStmt:
 		case Ast_IfStmt:
@@ -2074,6 +2091,12 @@ Ast *parse_operand(AstFile *f, bool lhs) {
 		} else if (name.string == "no_bounds_check") {
 			Ast *operand = parse_expr(f, lhs);
 			return parse_check_directive_for_statement(operand, name, StateFlag_no_bounds_check);
+		} else if (name.string == "fast_math") {
+			Ast *operand = parse_expr(f, lhs);
+			return parse_check_directive_for_statement(operand, name, StateFlag_fast_math);
+		} else if (name.string == "accurate_math") {
+			Ast *operand = parse_expr(f, lhs);
+			return parse_check_directive_for_statement(operand, name, StateFlag_accurate_math);
 		} else if (name.string == "relative") {
 			Ast *tag = ast_basic_directive(f, token, name);
 			tag = parse_call_expr(f, tag);
@@ -2169,6 +2192,12 @@ Ast *parse_operand(AstFile *f, bool lhs) {
 			}
 			if (tags & ProcTag_bounds_check) {
 				body->state_flags |= StateFlag_bounds_check;
+			}
+			if (tags & ProcTag_fast_math) {
+				body->state_flags |= StateFlag_fast_math;
+			}
+			if (tags & ProcTag_accurate_math) {
+				body->state_flags |= StateFlag_accurate_math;
 			}
 
 			return ast_proc_lit(f, type, body, tags, where_token, where_clauses);

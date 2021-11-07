@@ -72,6 +72,10 @@ void lb_init_module(lbModule *m, Checker *c) {
 
 	map_init(&m->debug_values, a);
 	array_init(&m->debug_incomplete_types, a, 0, 1024);
+	
+	
+	m->metadata_accurate_math = nullptr;
+	m->metadata_fast_math     = nullptr;
 }
 
 bool lb_init_generator(lbGenerator *gen, Checker *c) {

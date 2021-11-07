@@ -334,7 +334,6 @@ bool lb_try_direct_vector_arith(lbProcedure *p, TokenKind op, lbValue lhs, lbVal
 				GB_PANIC("Unsupported vector operation %.*s", LIT(token_strings[op]));
 				break;
 			}
-
 		} else {
 
 			switch (op) {
@@ -2855,9 +2854,25 @@ lbValue lb_build_expr(lbProcedure *p, Ast *expr) {
 			out |= StateFlag_no_bounds_check;
 			out &= ~StateFlag_bounds_check;
 		}
+		
+		if (in & StateFlag_fast_math) {
+			out |= StateFlag_fast_math;
+			out &= ~StateFlag_accurate_math;
+		} else if (in & StateFlag_accurate_math) {
+			out |= StateFlag_accurate_math;
+			out &= ~StateFlag_fast_math;
+		}
 
 		p->state_flags = out;
 	}
+	if (p->state_flags & StateFlag_fast_math) {
+		LLVMBuilderSetDefaultFPMathTag(p->builder, p->module->metadata_fast_math);
+	} else if (p->state_flags & StateFlag_accurate_math)  {
+		LLVMBuilderSetDefaultFPMathTag(p->builder, p->module->metadata_accurate_math);
+	} else {
+		LLVMBuilderSetDefaultFPMathTag(p->builder, nullptr);
+	}
+	
 
 	expr = unparen_expr(expr);
 
