@@ -1065,27 +1065,80 @@ gb_inline void tokenizer_skip_whitespace(Tokenizer *t, bool on_newline) {
 			case ' ':
 			case '\t':
 			case '\r':
-				advance_to_next_rune(t);
-				continue;
+				if (t->read_curr < t->end) {
+					t->curr = t->read_curr;
+					Rune rune = *t->read_curr;
+					if (rune == 0) {
+						tokenizer_err(t, "Illegal character NUL");
+						t->read_curr++;
+					} else if (rune & 0x80) { // not ASCII
+						isize width = utf8_decode(t->read_curr, t->end-t->read_curr, &rune);
+						t->read_curr += width;
+						if (rune == GB_RUNE_INVALID && width == 1) {
+							tokenizer_err(t, "Illegal UTF-8 encoding");
+						} else if (rune == GB_RUNE_BOM && t->curr-t->start > 0){
+							tokenizer_err(t, "Illegal byte order mark");
+						}
+					} else {
+						t->read_curr++;
+					}
+					t->curr_rune = rune;
+					t->column_minus_one++;
+				} else {
+					t->curr = t->end;
+					t->curr_rune = GB_RUNE_EOF;
+				}
+				break;
+			default:
+				goto end;
 			}
-			break;
 		}
 	} else {
 		for (;;) {
 			switch (t->curr_rune) {
 			case '\n':
+				if (t->curr_rune == '\n') {
+					t->column_minus_one = -1;
+					t->line_count++;
+				}
 			case ' ':
 			case '\t':
 			case '\r':
-				advance_to_next_rune(t);
-				continue;
+				if (t->read_curr < t->end) {
+					t->curr = t->read_curr;
+					Rune rune = *t->read_curr;
+					if (rune == 0) {
+						tokenizer_err(t, "Illegal character NUL");
+						t->read_curr++;
+					} else if (rune & 0x80) { // not ASCII
+						isize width = utf8_decode(t->read_curr, t->end-t->read_curr, &rune);
+						t->read_curr += width;
+						if (rune == GB_RUNE_INVALID && width == 1) {
+							tokenizer_err(t, "Illegal UTF-8 encoding");
+						} else if (rune == GB_RUNE_BOM && t->curr-t->start > 0){
+							tokenizer_err(t, "Illegal byte order mark");
+						}
+					} else {
+						t->read_curr++;
+					}
+					t->curr_rune = rune;
+					t->column_minus_one++;
+				} else {
+					t->curr = t->end;
+					t->curr_rune = GB_RUNE_EOF;
+				}
+				break;
+			default:
+				goto end;
 			}
-			break;
 		}
 	}
+end:;
+	return;
 }
 
-void tokenizer_get_token(Tokenizer *t, Token *token, int repeat=0) {
+void tokenizer_get_token(Tokenizer *t, Token *token) {
+retry:;
 	tokenizer_skip_whitespace(t, t->insert_semicolon);
 
 	token->kind = Token_Invalid;
@@ -1151,12 +1204,13 @@ void tokenizer_get_token(Tokenizer *t, Token *token, int repeat=0) {
 
 		case '\\':
 			t->insert_semicolon = false;
-			tokenizer_get_token(t, token);
-			if (token->pos.line == current_pos.line) {
-				tokenizer_err(t, token_pos_add_column(current_pos), "Expected a newline after \\");
+			tokenizer_skip_whitespace(t, true);
+			if (t->curr_rune == '\n') {
+				goto retry;
 			}
-			// NOTE(bill): tokenizer_get_token has been called already, return early
-			return;
+			token->kind = Token_Invalid;
+			tokenizer_err(t, token_pos_add_column(current_pos), "Expected a newline after \\");
+			break;
 
 		case '\'': // Rune Literal
 		{
