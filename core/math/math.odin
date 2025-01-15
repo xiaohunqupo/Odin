@@ -1,7 +1,7 @@
 package math
 
-import "core:intrinsics"
-import "core:builtin"
+import "base:intrinsics"
+import "base:builtin"
 _ :: intrinsics
 
 Float_Class :: enum {
@@ -60,6 +60,7 @@ sqrt :: proc{
 @(require_results) sin_f32be :: proc "contextless" (θ: f32be) -> f32be { return #force_inline f32be(sin_f32(f32(θ))) }
 @(require_results) sin_f64le :: proc "contextless" (θ: f64le) -> f64le { return #force_inline f64le(sin_f64(f64(θ))) }
 @(require_results) sin_f64be :: proc "contextless" (θ: f64be) -> f64be { return #force_inline f64be(sin_f64(f64(θ))) }
+// Return the sine of θ in radians.
 sin :: proc{
 	sin_f16, sin_f16le, sin_f16be,
 	sin_f32, sin_f32le, sin_f32be,
@@ -72,6 +73,7 @@ sin :: proc{
 @(require_results) cos_f32be :: proc "contextless" (θ: f32be) -> f32be { return #force_inline f32be(cos_f32(f32(θ))) }
 @(require_results) cos_f64le :: proc "contextless" (θ: f64le) -> f64le { return #force_inline f64le(cos_f64(f64(θ))) }
 @(require_results) cos_f64be :: proc "contextless" (θ: f64be) -> f64be { return #force_inline f64be(cos_f64(f64(θ))) }
+// Return the cosine of θ in radians.
 cos :: proc{
 	cos_f16, cos_f16le, cos_f16be,
 	cos_f32, cos_f32le, cos_f32be,
@@ -128,10 +130,10 @@ pow10 :: proc{
 
 @(require_results)
 pow10_f16 :: proc "contextless" (n: f16) -> f16 {
-	@static pow10_pos_tab := [?]f16{
+	@(static, rodata) pow10_pos_tab := [?]f16{
 		1e00, 1e01, 1e02, 1e03, 1e04,
 	}
-	@static pow10_neg_tab := [?]f16{
+	@(static, rodata) pow10_neg_tab := [?]f16{
 		1e-00, 1e-01, 1e-02, 1e-03, 1e-04, 1e-05, 1e-06, 1e-07,
 	}
 
@@ -149,13 +151,13 @@ pow10_f16 :: proc "contextless" (n: f16) -> f16 {
 
 @(require_results)
 pow10_f32 :: proc "contextless" (n: f32) -> f32 {
-	@static pow10_pos_tab := [?]f32{
+	@(static, rodata) pow10_pos_tab := [?]f32{
 		1e00, 1e01, 1e02, 1e03, 1e04, 1e05, 1e06, 1e07, 1e08, 1e09,
 		1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19,
 		1e20, 1e21, 1e22, 1e23, 1e24, 1e25, 1e26, 1e27, 1e28, 1e29,
 		1e30, 1e31, 1e32, 1e33, 1e34, 1e35, 1e36, 1e37, 1e38,
 	}
-	@static pow10_neg_tab := [?]f32{
+	@(static, rodata) pow10_neg_tab := [?]f32{
 		1e-00, 1e-01, 1e-02, 1e-03, 1e-04, 1e-05, 1e-06, 1e-07, 1e-08, 1e-09,
 		1e-10, 1e-11, 1e-12, 1e-13, 1e-14, 1e-15, 1e-16, 1e-17, 1e-18, 1e-19,
 		1e-20, 1e-21, 1e-22, 1e-23, 1e-24, 1e-25, 1e-26, 1e-27, 1e-28, 1e-29,
@@ -177,16 +179,16 @@ pow10_f32 :: proc "contextless" (n: f32) -> f32 {
 
 @(require_results)
 pow10_f64 :: proc "contextless" (n: f64) -> f64 {
-	@static pow10_tab := [?]f64{
+	@(static, rodata) pow10_tab := [?]f64{
 		1e00, 1e01, 1e02, 1e03, 1e04, 1e05, 1e06, 1e07, 1e08, 1e09,
 		1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19,
 		1e20, 1e21, 1e22, 1e23, 1e24, 1e25, 1e26, 1e27, 1e28, 1e29,
 		1e30, 1e31,
 	}
-	@static pow10_pos_tab32 := [?]f64{
+	@(static, rodata) pow10_pos_tab32 := [?]f64{
 		1e00, 1e32, 1e64, 1e96, 1e128, 1e160, 1e192, 1e224, 1e256, 1e288,
 	}
-	@static pow10_neg_tab32 := [?]f64{
+	@(static, rodata) pow10_neg_tab32 := [?]f64{
 		1e-00, 1e-32, 1e-64, 1e-96, 1e-128, 1e-160, 1e-192, 1e-224, 1e-256, 1e-288, 1e-320,
 	}
 
@@ -378,6 +380,7 @@ log10 :: proc{
 @(require_results) tan_f64   :: proc "contextless" (θ: f64)   -> f64   { return sin(θ)/cos(θ) }
 @(require_results) tan_f64le :: proc "contextless" (θ: f64le) -> f64le { return f64le(tan_f64(f64(θ))) }
 @(require_results) tan_f64be :: proc "contextless" (θ: f64be) -> f64be { return f64be(tan_f64(f64(θ))) }
+// Return the tangent of θ in radians.
 tan :: proc{
 	tan_f16, tan_f16le, tan_f16be,
 	tan_f32, tan_f32le, tan_f32be,
@@ -400,6 +403,12 @@ remap :: proc "contextless" (old_value, old_min, old_max, new_min, new_max: $T) 
 		return new_range / 2
 	}
 	return ((old_value - old_min) / old_range) * new_range + new_min
+}
+
+@(require_results)
+remap_clamped :: proc "contextless" (old_value, old_min, old_max, new_min, new_max: $T) -> (x: T) where intrinsics.type_is_numeric(T), !intrinsics.type_is_array(T) {
+	remapped := #force_inline remap(old_value, old_min, old_max, new_min, new_max)
+	return clamp(remapped, new_min, new_max)
 }
 
 @(require_results)
@@ -435,11 +444,11 @@ bias :: proc "contextless" (t, b: $T) -> T where intrinsics.type_is_numeric(T) {
 	return t / (((1/b) - 2) * (1 - t) + 1)
 }
 @(require_results)
-gain :: proc "contextless" (t, g: $T) -> T where intrinsics.type_is_numeric(T) {
+gain :: proc "contextless" (t, g: $T) -> T where intrinsics.type_is_float(T) {
 	if t < 0.5 {
-		return bias(t*2, g)*0.5
+		return bias(t*2, g) * 0.5
 	}
-	return bias(t*2 - 1, 1 - g)*0.5 + 0.5
+	return bias(t*2 - 1, 1 - g) * 0.5 + 0.5
 }
 
 
@@ -644,42 +653,175 @@ trunc :: proc{
 }
 
 @(require_results)
-round_f16   :: proc "contextless" (x: f16)   -> f16 {
-	return ceil(x - 0.5) if x < 0 else floor(x + 0.5)
+round_f16 :: proc "contextless" (x: f16) -> f16 {
+	// origin: Go /src/math/floor.go
+	//
+	// Copyright (c) 2009 The Go Authors. All rights reserved.
+	//
+	// Redistribution and use in source and binary forms, with or without
+	// modification, are permitted provided that the following conditions are
+	// met:
+	//
+	//    * Redistributions of source code must retain the above copyright
+	// notice, this list of conditions and the following disclaimer.
+	//    * Redistributions in binary form must reproduce the above
+	// copyright notice, this list of conditions and the following disclaimer
+	// in the documentation and/or other materials provided with the
+	// distribution.
+	//    * Neither the name of Google Inc. nor the names of its
+	// contributors may be used to endorse or promote products derived from
+	// this software without specific prior written permission.
+	//
+	// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+	// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+	// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+	// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+	// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+	// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+	// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+	// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+	// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+	// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+	mask  :: F16_MASK
+	shift :: F16_SHIFT
+	bias  :: F16_BIAS
+
+	bits := transmute(u16)x
+	e := (bits >> shift) & mask
+
+	if e < bias {
+		bits &= 0x8000
+		if e == bias - 1 {
+			bits |= transmute(u16)f16(1)
+		}
+	} else if e < bias + shift {
+		half     :: 1 << (shift - 1)
+		mantissa :: (1 << shift) - 1
+		e -= bias
+		bits += half >> e
+		bits &~= mantissa >> e
+	}
+
+	return transmute(f16)bits
 }
-@(require_results)
-round_f16le :: proc "contextless" (x: f16le) -> f16le {
-	return ceil(x - 0.5) if x < 0 else floor(x + 0.5)
-}
-@(require_results)
-round_f16be :: proc "contextless" (x: f16be) -> f16be {
-	return ceil(x - 0.5) if x < 0 else floor(x + 0.5)
-}
+@(require_results) round_f16le :: proc "contextless" (x: f16le) -> f16le { return #force_inline f16le(round_f16(f16(x))) }
+@(require_results) round_f16be :: proc "contextless" (x: f16be) -> f16be { return #force_inline f16be(round_f16(f16(x))) }
 
 @(require_results)
-round_f32   :: proc "contextless" (x: f32)   -> f32 {
-	return ceil(x - 0.5) if x < 0 else floor(x + 0.5)
+round_f32 :: proc "contextless" (x: f32) -> f32 {
+	// origin: Go /src/math/floor.go
+	//
+	// Copyright (c) 2009 The Go Authors. All rights reserved.
+	//
+	// Redistribution and use in source and binary forms, with or without
+	// modification, are permitted provided that the following conditions are
+	// met:
+	//
+	//    * Redistributions of source code must retain the above copyright
+	// notice, this list of conditions and the following disclaimer.
+	//    * Redistributions in binary form must reproduce the above
+	// copyright notice, this list of conditions and the following disclaimer
+	// in the documentation and/or other materials provided with the
+	// distribution.
+	//    * Neither the name of Google Inc. nor the names of its
+	// contributors may be used to endorse or promote products derived from
+	// this software without specific prior written permission.
+	//
+	// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+	// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+	// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+	// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+	// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+	// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+	// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+	// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+	// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+	// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+	mask  :: F32_MASK
+	shift :: F32_SHIFT
+	bias  :: F32_BIAS
+
+	bits := transmute(u32)x
+	e := (bits >> shift) & mask
+
+	if e < bias {
+		bits &= 0x8000_0000
+		if e == bias - 1 {
+			bits |= transmute(u32)f32(1)
+		}
+	} else if e < bias + shift {
+		half     :: 1 << (shift - 1)
+		mantissa :: (1 << shift) - 1
+		e -= bias
+		bits += half >> e
+		bits &~= mantissa >> e
+	}
+
+	return transmute(f32)bits
 }
+@(require_results) round_f32le :: proc "contextless" (x: f32le) -> f32le { return #force_inline f32le(round_f32(f32(x))) }
+@(require_results) round_f32be :: proc "contextless" (x: f32be) -> f32be { return #force_inline f32be(round_f32(f32(x))) }
+
 @(require_results)
-round_f32le :: proc "contextless" (x: f32le) -> f32le {
-	return ceil(x - 0.5) if x < 0 else floor(x + 0.5)
+round_f64 :: proc "contextless" (x: f64) -> f64 {
+	// origin: Go /src/math/floor.go
+	//
+	// Copyright (c) 2009 The Go Authors. All rights reserved.
+	//
+	// Redistribution and use in source and binary forms, with or without
+	// modification, are permitted provided that the following conditions are
+	// met:
+	//
+	//    * Redistributions of source code must retain the above copyright
+	// notice, this list of conditions and the following disclaimer.
+	//    * Redistributions in binary form must reproduce the above
+	// copyright notice, this list of conditions and the following disclaimer
+	// in the documentation and/or other materials provided with the
+	// distribution.
+	//    * Neither the name of Google Inc. nor the names of its
+	// contributors may be used to endorse or promote products derived from
+	// this software without specific prior written permission.
+	//
+	// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+	// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+	// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+	// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+	// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+	// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+	// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+	// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+	// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+	// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+	mask  :: F64_MASK
+	shift :: F64_SHIFT
+	bias  :: F64_BIAS
+
+	bits := transmute(u64)x
+	e := (bits >> shift) & mask
+
+	if e < bias {
+		bits &= 0x8000_0000_0000_0000
+		if e == bias - 1 {
+			bits |= transmute(u64)f64(1)
+		}
+	} else if e < bias + shift {
+		half     :: 1 << (shift - 1)
+		mantissa :: (1 << shift) - 1
+		e -= bias
+		bits += half >> e
+		bits &~= mantissa >> e
+	}
+
+	return transmute(f64)bits
 }
-@(require_results)
-round_f32be :: proc "contextless" (x: f32be) -> f32be {
-	return ceil(x - 0.5) if x < 0 else floor(x + 0.5)
-}
-@(require_results)
-round_f64   :: proc "contextless" (x: f64)   -> f64 {
-	return ceil(x - 0.5) if x < 0 else floor(x + 0.5)
-}
-@(require_results)
-round_f64le :: proc "contextless" (x: f64le) -> f64le {
-	return ceil(x - 0.5) if x < 0 else floor(x + 0.5)
-}
-@(require_results)
-round_f64be :: proc "contextless" (x: f64be) -> f64be {
-	return ceil(x - 0.5) if x < 0 else floor(x + 0.5)
-}
+@(require_results) round_f64le :: proc "contextless" (x: f64le) -> f64le { return #force_inline f64le(round_f64(f64(x))) }
+@(require_results) round_f64be :: proc "contextless" (x: f64be) -> f64be { return #force_inline f64be(round_f64(f64(x))) }
 round :: proc{
 	round_f16, round_f16le, round_f16be,
 	round_f32, round_f32le, round_f32be,
@@ -1129,7 +1271,7 @@ binomial :: proc "contextless" (n, k: int) -> int {
 	}
 
 	b := n
-	for i in 2..<k {
+	for i in 2..=k {
 		b = (b * (n+1-i))/i
 	}
 	return b
@@ -1138,7 +1280,7 @@ binomial :: proc "contextless" (n, k: int) -> int {
 @(require_results)
 factorial :: proc "contextless" (n: int) -> int {
 	when size_of(int) == size_of(i64) {
-		@static table := [21]int{
+		@(static, rodata) table := [21]int{
 			1,
 			1,
 			2,
@@ -1162,7 +1304,7 @@ factorial :: proc "contextless" (n: int) -> int {
 			2_432_902_008_176_640_000,
 		}
 	} else {
-		@static table := [13]int{
+		@(static, rodata) table := [13]int{
 			1,
 			1,
 			2,
@@ -1619,7 +1761,28 @@ atan2_f64be :: proc "contextless" (y, x: f64be) -> f64be {
 	// TODO(bill): Better atan2_f32
 	return f64be(atan2_f64(f64(y), f64(x)))
 }
+/*
+ Return the arc tangent of y/x in radians. Defined on the domain [-∞, ∞] for x and y with a range of [-π, π]
 
+ Special cases:
+	atan2(y, NaN)     = NaN
+	atan2(NaN, x)     = NaN
+	atan2(+0, x>=0)   = + 0
+	atan2(-0, x>=0)   = - 0
+	atan2(+0, x<=-0)  = + π
+	atan2(-0, x<=-0)  = - π
+	atan2(y>0, 0)     = + π/2
+	atan2(y<0, 0)     = - π/2
+	atan2(+∞, +∞)     = + π/4
+	atan2(-∞, +∞)     = - π/4
+	atan2(+∞, -∞)     =   3π/4
+	atan2(-∞, -∞)     = - 3π/4
+	atan2(y, +∞)      =   0
+	atan2(y>0, -∞)    = + π
+	atan2(y<0, -∞)    = - π
+	atan2(+∞, x)      = + π/2
+	atan2(-∞, x)      = - π/2
+*/
 atan2 :: proc{
 	atan2_f64, atan2_f32, atan2_f16,
 	atan2_f64le, atan2_f64be,
@@ -1627,6 +1790,7 @@ atan2 :: proc{
 	atan2_f16le, atan2_f16be,
 }
 
+// Return the arc tangent of x, in radians. Defined on the domain of [-∞, ∞] with a range of [-π/2, π/2]
 @(require_results)
 atan :: proc "contextless" (x: $T) -> T where intrinsics.type_is_float(T) {
 	return atan2(x, 1)
@@ -1738,6 +1902,7 @@ asin_f16le :: proc "contextless" (x: f16le) -> f16le {
 asin_f16be :: proc "contextless" (x: f16be) -> f16be {
 	return f16be(asin_f64(f64(x)))
 }
+// Return the arc sine of x, in radians. Defined on the domain of [-1, 1] with a range of [-π/2, π/2]
 asin :: proc{
 	asin_f64, asin_f32, asin_f16,
 	asin_f64le, asin_f64be,
@@ -1852,6 +2017,7 @@ acos_f16le :: proc "contextless" (x: f16le) -> f16le {
 acos_f16be :: proc "contextless" (x: f16be) -> f16be {
 	return f16be(acos_f64(f64(x)))
 }
+// Return the arc cosine of x, in radians. Defined on the domain of [-1, 1] with a range of [0, π].
 acos :: proc{
 	acos_f64, acos_f32, acos_f16,
 	acos_f64le, acos_f64be,
@@ -2281,6 +2447,36 @@ hypot :: proc{
 	hypot_f16, hypot_f16le, hypot_f16be,
 	hypot_f32, hypot_f32le, hypot_f32be,
 	hypot_f64, hypot_f64le, hypot_f64be,
+}
+
+@(require_results)
+count_digits_of_base :: proc "contextless" (value: $T, $base: int) -> (digits: int) where intrinsics.type_is_integer(T) {
+	#assert(base >= 2, "base must be 2 or greater.")
+
+	value := value
+	when !intrinsics.type_is_unsigned(T) {
+		value = abs(value)
+	}
+
+	when base == 2 {
+		digits = max(1, 8 * size_of(T) - int(intrinsics.count_leading_zeros(value)))
+	} else when intrinsics.count_ones(base) == 1 {
+		free_bits := 8 * size_of(T) - int(intrinsics.count_leading_zeros(value))
+		digits, free_bits = divmod(free_bits, intrinsics.constant_log2(base))
+		if free_bits > 0 {
+			digits += 1
+		}
+		digits = max(1, digits)
+	} else {
+		digits = 1
+		base := cast(T)base
+		for value >= base {
+			value /= base
+			digits += 1
+		}
+	}
+
+	return
 }
 
 F16_DIG        :: 3

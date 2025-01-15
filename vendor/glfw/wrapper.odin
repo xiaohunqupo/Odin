@@ -8,6 +8,10 @@ Terminate :: glfw.Terminate
 
 InitHint  :: glfw.InitHint
 
+InitAllocator :: glfw.InitAllocator
+
+InitVulkanLoader :: glfw.InitVulkanLoader
+
 GetVersion :: proc "c" () -> (major, minor, rev: c.int) {
 	glfw.GetVersion(&major, &minor, &rev)
 	return
@@ -27,6 +31,10 @@ GetMonitors :: proc "c" () -> []MonitorHandle {
 }
 GetMonitorPos :: proc "c" (monitor: MonitorHandle) -> (xpos, ypos: c.int) {
 	glfw.GetMonitorPos(monitor, &xpos, &ypos)
+	return
+}
+GetMonitorWorkarea :: proc "c" (monitor: MonitorHandle) -> (xpos, ypos, width, height: c.int) {
+	glfw.GetMonitorWorkarea(monitor, &xpos, &ypos, &width, &height)
 	return
 }
 GetMonitorPhysicalSize :: proc "c" (monitor: MonitorHandle) -> (widthMM, heightMM: c.int) {
@@ -121,6 +129,7 @@ GetKeyName :: proc "c" (key, scancode: c.int) -> string {
 	return string(glfw.GetKeyName(key, scancode))
 }
 SetWindowShouldClose :: glfw.SetWindowShouldClose
+GetWindowTitle       :: glfw.GetWindowTitle
 JoystickPresent      :: glfw.JoystickPresent
 GetJoystickName :: proc "c" (joy: c.int) -> string {
 	return string(glfw.GetJoystickName(joy))
@@ -149,8 +158,9 @@ WaitEvents        :: glfw.WaitEvents
 WaitEventsTimeout :: glfw.WaitEventsTimeout
 PostEmptyEvent    :: glfw.PostEmptyEvent
 
-GetInputMode :: glfw.GetInputMode
-SetInputMode :: glfw.SetInputMode
+RawMouseMotionSupported :: glfw.RawMouseMotionSupported
+GetInputMode            :: glfw.GetInputMode
+SetInputMode            :: glfw.SetInputMode
 
 GetMouseButton :: glfw.GetMouseButton
 GetCursorPos :: proc "c" (window: WindowHandle) -> (xpos, ypos: f64) {
@@ -236,6 +246,8 @@ SetJoystickCallback    :: glfw.SetJoystickCallback
 
 SetErrorCallback :: glfw.SetErrorCallback
 
+GetPlatform       :: glfw.GetPlatform
+PlatformSupported :: glfw.PlatformSupported
 
 // Used by vendor:OpenGL
 gl_set_proc_address :: proc(p: rawptr, name: cstring) {
