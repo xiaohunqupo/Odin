@@ -1,14 +1,8 @@
 package miniaudio
 
-import c "core:c/libc"
+import "core:c"
 
-when ODIN_OS == .Windows {
-	foreign import lib "lib/miniaudio.lib"
-} else when ODIN_OS == .Linux {
-	foreign import lib "lib/miniaudio.a"
-} else {
-	foreign import lib "system:miniaudio"
-}
+foreign import lib { LIB }
 
 @(default_calling_convention="c", link_prefix="ma_")
 foreign lib {
@@ -106,6 +100,13 @@ foreign lib {
 	Helper for converting gain in decibels to a linear factor.
 	*/
 	volume_db_to_linear :: proc(gain: f32) -> f32 ---
+
+	/*
+	Mixes the specified number of frames in floating point format with a volume factor.
+
+	This will run on an optimized path when the volume is equal to 1.
+	*/
+	ma_mix_pcm_frames_f32 :: proc(pDst: ^f32, pSrc: ^f32, frameCount: u64, channels: u32, volume: f32) -> result ---
 }
 
 offset_pcm_frames_ptr_f32 :: #force_inline proc "c" (p: [^]f32, offsetInFrames: u64, channels: u32) -> [^]f32 {
@@ -118,7 +119,12 @@ offset_pcm_frames_const_ptr_f32 :: #force_inline proc "c" (p: [^]f32, offsetInFr
 
 data_source :: struct {}
 
-DATA_SOURCE_SELF_MANAGED_RANGE_AND_LOOP_POINT :: 0x00000001
+data_source_flag :: enum c.int {
+	SELF_MANAGED_RANGE_AND_LOOP_POINT = 0,
+}
+
+data_source_flags :: bit_set[data_source_flag; u32]
+
 
 data_source_vtable :: struct {
 	onRead:          proc "c" (pDataSource: ^data_source, pFramesOut: rawptr, frameCount: u64, pFramesRead: ^u64) -> result,
@@ -127,7 +133,7 @@ data_source_vtable :: struct {
 	onGetCursor:     proc "c" (pDataSource: ^data_source, pCursor: ^u64) -> result,
 	onGetLength:     proc "c" (pDataSource: ^data_source, pLength: ^u64) -> result,
 	onSetLooping:    proc "c" (pDataSource: ^data_source, isLooping: b32) -> result,
-	flags:           u32,
+	flags:           data_source_flags,
 } 
 
 data_source_get_next_proc :: proc "c" (pDataSource: ^data_source) -> ^data_source
@@ -298,4 +304,32 @@ foreign lib {
 	paged_audio_buffer_seek_to_pcm_frame        :: proc(pPagedAudioBuffer: ^paged_audio_buffer, frameIndex: u64) -> result ---
 	paged_audio_buffer_get_cursor_in_pcm_frames :: proc(pPagedAudioBuffer: ^paged_audio_buffer, pCursor: ^u64) -> result ---
 	paged_audio_buffer_get_length_in_pcm_frames :: proc(pPagedAudioBuffer: ^paged_audio_buffer, pLength: ^u64) -> result ---
+}
+
+pulsewave_config :: struct {
+	format:     format,
+	channels:   u32,
+	sampleRate: u32,
+	dutyCycle:  f64,
+	amplitude:  f64,
+	frequency:  f64,
+}
+
+pulsewave :: struct {
+	waveform: waveform,
+	config:   pulsewave_config,
+}
+
+@(default_calling_convention="c", link_prefix="ma_")
+foreign lib {
+	pulsewave_config_init :: proc(format: format, channels: u32, sampleRate: u32, dutyCycle: f64, amplitude: f64, frequency: f64) -> pulsewave_config ---
+
+	pulsewave_init              :: proc(pConfig: ^pulsewave_config, pWaveForm: ^pulsewave) -> result ---
+	pulsewave_uninit            :: proc(pWaveForm: ^pulsewave) ---
+	pulsewave_read_pcm_frames   :: proc(pWaveForm: ^pulsewave, pFramesOut: rawptr, frameCount: u64, pFramesRead: ^u64) -> result ---
+	pulsewave_seek_to_pcm_frame :: proc(pWaveForm: ^pulsewave, frameIndex: u64) -> result ---
+	pulsewave_set_amplitude     :: proc(pWaveForm: ^pulsewave, amplitude: f64) -> result ---
+	pulsewave_set_frequency     :: proc(pWaveForm: ^pulsewave, frequency: f64) -> result ---
+	pulsewave_set_sample_rate   :: proc(pWaveForm: ^pulsewave, sampleRate: u32) -> result ---
+	pulsewave_set_duty_cycle    :: proc(pWaveForm: ^pulsewave, dutyCycle: f64) -> result ---
 }
