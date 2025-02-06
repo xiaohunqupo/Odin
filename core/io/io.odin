@@ -3,7 +3,7 @@
 // operations into an abstracted stream interface.
 package io
 
-import "core:intrinsics"
+import "base:intrinsics"
 import "core:unicode/utf8"
 
 // Seek whence values
@@ -29,7 +29,7 @@ Error :: enum i32 {
 	// Invalid_Write means that a write returned an impossible count
 	Invalid_Write,
 
-	// Short_Buffer means that a read required a longer buffer than was provided
+	// Short_Buffer means that a read/write required a longer buffer than was provided
 	Short_Buffer,
 
 	// No_Progress is returned by some implementations of `io.Reader` when many calls
@@ -126,7 +126,7 @@ _i64_err :: #force_inline proc "contextless" (n: int, err: Error) -> (i64, Error
 }
 
 
-// read reads up to len(p) bytes into s. It returns the number of bytes read and any error if occurred.
+// read reads up to len(p) bytes into p. It returns the number of bytes read and any error if occurred.
 //
 // When read encounters an .EOF or error after successfully reading n > 0 bytes, it returns the number of
 // bytes read along with the error.
@@ -142,7 +142,7 @@ read :: proc(s: Reader, p: []byte, n_read: ^int = nil) -> (n: int, err: Error) {
 	return
 }
 
-// write writes up to len(p) bytes into s. It returns the number of bytes written and any error if occurred.
+// write writes up to len(p) bytes into p. It returns the number of bytes written and any error if occurred.
 write :: proc(s: Writer, p: []byte, n_written: ^int = nil) -> (n: int, err: Error) {
 	if s.procedure != nil {
 		n64: i64
@@ -355,6 +355,25 @@ read_at_least :: proc(r: Reader, buf: []byte, min: int) -> (n: int, err: Error) 
 		err = nil
 	} else if n > 0 && err == .EOF {
 		err = .Unexpected_EOF
+	}
+	return
+}
+
+// write_full writes until the entire contents of `buf` has been written or an error occurs.
+write_full :: proc(w: Writer, buf: []byte) -> (n: int, err: Error) {
+	return write_at_least(w, buf, len(buf))
+}
+
+// write_at_least writes at least `buf[:min]` to the writer and returns the amount written.
+// If an error occurs before writing everything it is returned.
+write_at_least :: proc(w: Writer, buf: []byte, min: int) -> (n: int, err: Error) {
+	if len(buf) < min {
+		return 0, .Short_Buffer
+	}
+	for n < min && err == nil {
+		nn: int
+		nn, err = write(w, buf[n:])
+		n += nn
 	}
 	return
 }

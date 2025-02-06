@@ -3,8 +3,10 @@ package sdl2
 import "core:c"
 
 when ODIN_OS == .Windows {
+	@(ignore_duplicates)
 	foreign import lib "SDL2.lib"
 } else {
+	@(ignore_duplicates)
 	foreign import lib "system:SDL2"
 }
 
@@ -34,6 +36,7 @@ foreign lib {
 	SemWait          :: proc(s: ^sem) -> c.int ---
 	SemTryWait       :: proc(s: ^sem) -> c.int ---
 	SemWaitTimeout   :: proc(s: ^sem, ms: u32) -> c.int ---
+	SemPost          :: proc(s: ^sem) -> c.int ---
 	SemValue         :: proc(s: ^sem) -> u32 ---
 
 	CreateCond      :: proc() -> ^cond ---

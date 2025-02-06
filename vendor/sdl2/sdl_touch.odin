@@ -3,8 +3,10 @@ package sdl2
 import "core:c"
 
 when ODIN_OS == .Windows {
+	@(ignore_duplicates)
 	foreign import lib "SDL2.lib"
 } else {
+	@(ignore_duplicates)
 	foreign import lib "system:SDL2"
 }
 
@@ -19,10 +21,10 @@ TouchDeviceType :: enum c.int {
 }
 
 Finger :: struct {
-    id: FingerID,
-    x:        f32,
-    y:        f32,
-    pressure: f32,
+	id: FingerID,
+	x:        f32,
+	y:        f32,
+	pressure: f32,
 }
 
 TOUCH_MOUSEID  :: ~u32(0)

@@ -3,8 +3,10 @@ package sdl2
 import "core:c"
 
 when ODIN_OS == .Windows {
+	@(ignore_duplicates)
 	foreign import lib "SDL2.lib"
 } else {
+	@(ignore_duplicates)
 	foreign import lib "system:SDL2"
 }
 
@@ -88,8 +90,8 @@ foreign lib {
 	RWwrite :: proc(ctx: ^RWops, size: c.size_t, num: c.size_t) -> c.size_t ---
 	RWclose :: proc(ctx: ^RWops) -> c.int ---
 
-	LoadFile_RW :: proc(src: ^RWops, datasize: c.size_t, freesrc: bool) -> rawptr ---
-	LoadFile    :: proc(file: rawptr, datasize: c.size_t) -> rawptr ---
+	LoadFile_RW :: proc(src: ^RWops, datasize: ^c.size_t, freesrc: bool) -> rawptr ---
+	LoadFile    :: proc(file: rawptr, datasize: ^c.size_t) -> rawptr ---
 
 	ReadU8   :: proc(src: ^RWops) -> u8 ---
 	ReadLE16 :: proc(src: ^RWops) -> u16 ---

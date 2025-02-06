@@ -1,4 +1,4 @@
-// +build windows, linux, darwin
+#+build windows, linux, darwin, freebsd
 package net
 
 /*
@@ -10,12 +10,14 @@ package net
 	Copyright 2022 Tetralux        <tetraluxonpc@gmail.com>
 	Copyright 2022 Colin Davidson  <colrdavidson@gmail.com>
 	Copyright 2022 Jeroen van Rijn <nom@duclavier.com>.
+	Copyright 2024 Feoramund       <rune@swevencraft.org>.
 	Made available under Odin's BSD-3 license.
 
 	List of contributors:
 		Tetralux:        Initial implementation
 		Colin Davidson:  Linux platform code, OSX platform code, Odin-native DNS resolver
 		Jeroen van Rijn: Cross platform unification, code style, documentation
+		Feoramund:       FreeBSD platform code
 */
 
 import "core:mem"
@@ -30,7 +32,7 @@ when ODIN_OS == .Windows {
 		resolv_conf        = "",
 		hosts_file         = "%WINDIR%\\system32\\drivers\\etc\\hosts",
 	}
-} else when ODIN_OS == .Linux || ODIN_OS == .Darwin || ODIN_OS == .OpenBSD {
+} else when ODIN_OS == .Linux || ODIN_OS == .Darwin || ODIN_OS == .FreeBSD || ODIN_OS == .OpenBSD || ODIN_OS == .NetBSD {
 	DEFAULT_DNS_CONFIGURATION :: DNS_Configuration{
 		resolv_conf        = "/etc/resolv.conf",
 		hosts_file         = "/etc/hosts",
@@ -130,7 +132,14 @@ resolve_ip4 :: proc(hostname_and_maybe_port: string) -> (ep4: Endpoint, err: Net
 			return
 		}
 	case Host:
-		recs, _ := get_dns_records_from_os(t.hostname, .IP4, context.temp_allocator)
+		recs: []DNS_Record
+
+		if ODIN_OS != .Windows && strings.has_suffix(t.hostname, ".local") {
+			recs, _ = get_dns_records_from_nameservers(t.hostname, .IP4, {IP4_mDNS_Broadcast}, nil, context.temp_allocator)
+		} else {
+			recs, _ = get_dns_records_from_os(t.hostname, .IP4, context.temp_allocator)
+		}
+
 		if len(recs) == 0 {
 			err = .Unable_To_Resolve
 			return
@@ -157,7 +166,14 @@ resolve_ip6 :: proc(hostname_and_maybe_port: string) -> (ep6: Endpoint, err: Net
 			return t, nil
 		}
 	case Host:
-		recs, _ := get_dns_records_from_os(t.hostname, .IP6, context.temp_allocator)
+		recs: []DNS_Record
+
+		if ODIN_OS != .Windows && strings.has_suffix(t.hostname, ".local") {
+			recs, _ = get_dns_records_from_nameservers(t.hostname, .IP6, {IP6_mDNS_Broadcast}, nil, context.temp_allocator)
+		} else {
+			recs, _ = get_dns_records_from_os(t.hostname, .IP6, context.temp_allocator)
+		}
+
 		if len(recs) == 0 {
 			err = .Unable_To_Resolve
 			return
@@ -253,12 +269,6 @@ get_dns_records_from_nameservers :: proc(hostname: string, type: DNS_Record_Type
 			return nil, .Connection_Error
 		}
 
-		// recv_sz, _, recv_err := recv_udp(conn, dns_response_buf[:])
-		// if recv_err == UDP_Recv_Error.Timeout {
-		// 	continue
-		// } else if recv_err != nil {
-		// 	continue
-		// }
 		recv_sz, _ := recv_udp(conn, dns_response_buf[:]) or_continue
 		if recv_sz == 0 {
 			continue
@@ -816,7 +826,6 @@ parse_response :: proc(response: []u8, filter: DNS_Record_Type = nil, allocator 
 
 		dq_sz :: 4
 		hn_sz := skip_hostname(response, cur_idx) or_return
-		dns_query := mem.slice_data_cast([]u16be, response[cur_idx+hn_sz:cur_idx+hn_sz+dq_sz])
 
 		cur_idx += hn_sz + dq_sz
 	}

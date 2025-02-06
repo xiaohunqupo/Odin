@@ -23,11 +23,13 @@ package sdl2
 
 
 import "core:c"
-import "core:intrinsics"
+import "base:intrinsics"
 
 when ODIN_OS == .Windows {
+	@(ignore_duplicates)
 	foreign import lib "SDL2.lib"
 } else {
+	@(ignore_duplicates)
 	foreign import lib "system:SDL2"
 }
 
@@ -40,6 +42,12 @@ version :: struct {
 MAJOR_VERSION   :: 2
 MINOR_VERSION   :: 0
 PATCHLEVEL      :: 16
+
+VERSION :: proc "contextless" (ver: ^version) {
+	ver.major = MAJOR_VERSION
+	ver.minor = MINOR_VERSION
+	ver.patch = PATCHLEVEL
+}
 
 @(default_calling_convention="c", link_prefix="SDL_")
 foreign lib {
@@ -235,8 +243,8 @@ foreign lib {
 // quit
 
 QuitRequested :: #force_inline proc "c" () -> bool {
-        PumpEvents()
-        return bool(PeepEvents(nil, 0, .PEEKEVENT, .QUIT, .QUIT) > 0)
+	PumpEvents()
+	return bool(PeepEvents(nil, 0, .PEEKEVENT, .QUIT, .QUIT) > 0)
 }
 
 
