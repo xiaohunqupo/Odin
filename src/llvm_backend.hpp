@@ -173,6 +173,8 @@ struct lbModule {
 	StringMap<lbValue>  members;
 	StringMap<lbProcedure *> procedures;
 	PtrMap<LLVMValueRef, Entity *> procedure_values;
+
+	BlockingMutex missing_procedures_to_check_mutex;
 	Array<lbProcedure *> missing_procedures_to_check;
 
 	StringMap<LLVMValueRef>   const_strings;
@@ -238,8 +240,6 @@ struct lbGenerator : LinkerData {
 	PtrMap<Ast *, lbProcedure *> anonymous_proc_lits; 
 
 	isize used_module_count;
-
-	std::atomic<bool> module_verification_failed;
 
 	lbProcedure *startup_runtime;
 	lbProcedure *cleanup_runtime;
@@ -333,6 +333,14 @@ struct lbVariadicReuseSlices {
 	lbAddr slice_addr;
 };
 
+struct lbGlobalVariable {
+	lbValue var;
+	lbValue init;
+	DeclInfo *decl;
+	bool is_initialized;
+};
+
+
 struct lbProcedure {
 	u32 flags;
 	u16 state_flags;
@@ -395,6 +403,12 @@ struct lbProcedure {
 	PtrMap<LLVMValueRef, lbTupleFix> tuple_fix_map;
 
 	Array<lbValue> asan_stack_locals;
+
+	void (*generate_body)(lbModule *m, lbProcedure *p);
+	Array<lbGlobalVariable> *global_variables;
+	lbProcedure *objc_names;
+
+	Type *internal_gen_type; // map_set, map_get, etc.
 };
 
 

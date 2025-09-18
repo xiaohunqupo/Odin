@@ -154,7 +154,7 @@ gb_internal bool lb_init_generator(lbGenerator *gen, Checker *c) {
 			map_set(&gen->modules, cast(void *)pkg, m);
 			lb_init_module(m, c);
 
-			if (build_context.internal_weak_monomorphization) {
+			if (LLVM_WEAK_MONOMORPHIZATION) {
 				auto pm = gb_alloc_item(permanent_allocator(), lbModule);
 				pm->pkg = pkg;
 				pm->gen = gen;
@@ -181,7 +181,7 @@ gb_internal bool lb_init_generator(lbGenerator *gen, Checker *c) {
 				lb_init_module(m, c);
 
 
-				if (build_context.internal_weak_monomorphization) {
+				if (LLVM_WEAK_MONOMORPHIZATION) {
 					auto pm  = gb_alloc_item(permanent_allocator(), lbModule);
 					pm->file = file;
 					pm->pkg  = pkg;
@@ -469,7 +469,7 @@ gb_internal lbModule *lb_module_of_entity(lbGenerator *gen, Entity *e, lbModule 
 	GB_ASSERT(curr_module != nullptr);
 	lbModule *m = lb_module_of_entity_internal(gen, e, curr_module);
 
-	if (USE_SEPARATE_MODULES && build_context.internal_weak_monomorphization) {
+	if (USE_SEPARATE_MODULES) {
 		if (e->kind == Entity_Procedure && e->Procedure.generated_from_polymorphic) {
 			if (m->polymorphic_module) {
 				return m->polymorphic_module;
@@ -3030,10 +3030,11 @@ gb_internal lbValue lb_find_procedure_value_from_entity(lbModule *m, Entity *e) 
 	}
 
 	if (ignore_body) {
-		mutex_lock(&gen->anonymous_proc_lits_mutex);
-		defer (mutex_unlock(&gen->anonymous_proc_lits_mutex));
+		// mutex_lock(&gen->anonymous_proc_lits_mutex);
+		// defer (mutex_unlock(&gen->anonymous_proc_lits_mutex));
 
 		GB_ASSERT(other_module != nullptr);
+		mutex_lock(&other_module->missing_procedures_to_check_mutex);
 		rw_mutex_shared_lock(&other_module->values_mutex);
 		auto *found = map_get(&other_module->values, e);
 		rw_mutex_shared_unlock(&other_module->values_mutex);
@@ -3042,6 +3043,7 @@ gb_internal lbValue lb_find_procedure_value_from_entity(lbModule *m, Entity *e) 
 			lbProcedure *missing_proc_in_other_module = lb_create_procedure(other_module, e, false);
 			array_add(&other_module->missing_procedures_to_check, missing_proc_in_other_module);
 		}
+		mutex_unlock(&other_module->missing_procedures_to_check_mutex);
 	} else {
 		array_add(&m->missing_procedures_to_check, missing_proc);
 	}
