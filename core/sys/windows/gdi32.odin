@@ -19,6 +19,7 @@ foreign gdi32 {
 	RestoreDC          :: proc(hdc: HDC, nSavedDC: INT) -> BOOL ---
 
 	CreateDIBPatternBrush :: proc(h: HGLOBAL, iUsage: UINT) -> HBRUSH ---
+	CreateBitmap          :: proc(nWidth: INT, nHeight: INT, nPlanes: UINT, nBitCount: UINT, lpBits: LPVOID) -> HBITMAP ---
 	CreateDIBitmap        :: proc(hdc: HDC, pbmih: ^BITMAPINFOHEADER, flInit: DWORD, pjBits: VOID, pbmi: ^BITMAPINFO, iUsage: UINT) -> HBITMAP ---
 	CreateDIBSection      :: proc(hdc: HDC, pbmi: ^BITMAPINFO, usage: UINT, ppvBits: ^^VOID, hSection: HANDLE, offset: DWORD) -> HBITMAP ---
 	StretchDIBits         :: proc(hdc: HDC, xDest, yDest, DestWidth, DestHeight, xSrc, ySrc, SrcWidth, SrcHeight: INT, lpBits: VOID, lpbmi: ^BITMAPINFO, iUsage: UINT, rop: DWORD) -> INT ---
@@ -150,6 +151,13 @@ BKMODE :: enum {
 	TRANSPARENT = 1,
 	OPAQUE      = 2,
 }
+
+ICONINFO :: struct {
+	fIcon:              BOOL,
+	xHotspot, yHotspot: DWORD,
+	hbmMask, hbmColor:  HBITMAP,
+}
+PICONINFO :: ^ICONINFO
 
 ICONINFOEXW :: struct {
 	cbSize:             DWORD,

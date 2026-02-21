@@ -116,6 +116,7 @@ foreign user32 {
 
 	CreateIcon             :: proc(hInstance: HINSTANCE, nWidth, nHeight: INT, cPlanes: BYTE, cBitsPixel: BYTE, lpbANDbits: PBYTE, lpbXORbits: PBYTE) -> HICON ---
 	CreateIconFromResource :: proc(presbits: PBYTE, dwResSize: DWORD, fIcon: BOOL, dwVer: DWORD) -> HICON ---
+	CreateIconIndirect     :: proc(piconinfo: PICONINFO) -> HICON ---
 	DestroyIcon            :: proc(hIcon: HICON) -> BOOL ---
 	DrawIcon               :: proc(hDC: HDC, X, Y: INT, hIcon: HICON) -> BOOL ---
 

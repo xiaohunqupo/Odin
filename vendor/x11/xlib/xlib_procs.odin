@@ -13,7 +13,8 @@ foreign xcursor {
 	cursorGetDefaultSize    :: proc(display: ^Display) -> i32 ---
 	cursorLibraryLoadCursor :: proc(display: ^Display, name: cstring) -> Cursor ---
 	cursorLibraryLoadImage  :: proc(name: cstring, theme: cstring, size: i32) -> rawptr ---
-	cursorImageLoadCursor   :: proc(display: ^Display, img: rawptr) -> Cursor ---
+	cursorImageCreate       :: proc(width: i32, height: i32) -> ^CursorImage ---
+	cursorImageLoadCursor   :: proc(display: ^Display, img: ^CursorImage) -> Cursor ---
 	cursorImageDestroy      :: proc(img: rawptr) ---
 }
 
