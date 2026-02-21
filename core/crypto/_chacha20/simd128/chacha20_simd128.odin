@@ -227,10 +227,7 @@ is_performant :: proc "contextless" () -> bool {
 			req_features :: info.CPU_Features{.V}
 		}
 
-		features, ok := info.cpu.features.?
-		if !ok {
-			return false
-		}
+		features := info.cpu_features() or_return
 
 		return features >= req_features
 	} else when ODIN_ARCH == .wasm64p32 || ODIN_ARCH == .wasm32 {

@@ -1,33 +1,27 @@
 package sysinfo
 
+import     "base:intrinsics"
+import     "base:runtime"
+import     "core:strings"
+import     "core:unicode/utf16"
 import sys "core:sys/windows"
-import "base:intrinsics"
-import "core:strings"
-import "core:unicode/utf16"
-import "base:runtime"
 
-@(init, private)
-init_os_version :: proc "contextless" () {
-	// NOTE(Jeroen): Only needed for the string builder.
-	context = runtime.default_context()
-
+@(private)
+_os_version :: proc (allocator: runtime.Allocator, loc := #caller_location) -> (res: OS_Version, ok: bool) {
 	/*
-		NOTE(Jeroen):
-			`GetVersionEx`  will return 6.2 for Windows 10 unless the program is manifested for Windows 10.
-			`RtlGetVersion` will return the true version.
+	NOTE(Jeroen):
+		`GetVersionEx`  will return 6.2 for Windows 10 unless the program is manifested for Windows 10.
+		`RtlGetVersion` will return the true version.
 
-			Rather than include the WinDDK, we ask the kernel directly.
-			`HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion` is for the minor build version (Update Build Release)
-
+		Rather than include the WinDDK, we ask the kernel directly.
+		`HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion` is for the minor build version (Update Build Release)
 	*/
-	os_version.platform = .Windows
+	res.platform = .Windows
 
 	osvi: sys.OSVERSIONINFOEXW
 	osvi.dwOSVersionInfoSize = size_of(osvi)
-	status := sys.RtlGetVersion(&osvi)
-
-	if status != 0 {
-		return
+	if status := sys.RtlGetVersion(&osvi); status != 0 {
+		return res, false
 	}
 
 	product_type: sys.Windows_Product_Type
@@ -37,12 +31,13 @@ init_os_version :: proc "contextless" () {
 		&product_type,
 	)
 
-	os_version.major    = int(osvi.dwMajorVersion)
-	os_version.minor    = int(osvi.dwMinorVersion)
-	os_version.build[0] = int(osvi.dwBuildNumber)
+	res.os.major     = int(osvi.dwMajorVersion)
+	res.os.minor     = int(osvi.dwMinorVersion)
+	res.kernel.major = int(osvi.dwMajorVersion)
+	res.kernel.minor = int(osvi.dwBuildNumber)
 
+	b := strings.builder_make_none(allocator = allocator, loc = loc)
 
-	b := strings.builder_from_bytes(version_string_buf[:])
 	strings.write_string(&b, "Windows ")
 
 	switch osvi.dwMajorVersion {
@@ -120,13 +115,13 @@ init_os_version :: proc "contextless" () {
 	}
 
 	// Grab DisplayVersion
-	os_version.version = format_display_version(&b)
+	res.release = format_display_version(&b)
 
 	// Grab build number and UBR
-	os_version.build[1]  = format_build_number(&b, int(osvi.dwBuildNumber))
+	res.kernel.patch = format_build_number(&b, int(osvi.dwBuildNumber))
 
 	// Finish the string
-	os_version.as_string = strings.to_string(b)
+	res.full = strings.to_string(b)
 
 	format_windows_product_type :: proc (b: ^strings.Builder, prod_type: sys.Windows_Product_Type) {
 		#partial switch prod_type {
@@ -253,28 +248,32 @@ init_os_version :: proc "contextless" () {
 		}
 		return
 	}
+
+	return res, true
 }
 
-@(init, private)
-init_ram :: proc "contextless" () {
+@(private)
+_ram_stats :: proc "contextless" () -> (total_ram, free_ram, total_swap, free_swap: i64, ok: bool) {
 	state: sys.MEMORYSTATUSEX
 
 	state.dwLength = size_of(state)
-	ok := sys.GlobalMemoryStatusEx(&state)
-	if !ok {
+	if ok := sys.GlobalMemoryStatusEx(&state); !ok {
 		return
 	}
-	ram = RAM{
-		total_ram  = int(state.ullTotalPhys),
-		free_ram   = int(state.ullAvailPhys),
-		total_swap = int(state.ullTotalPageFil),
-		free_swap  = int(state.ullAvailPageFil),
-	}
+
+	total_ram  = i64(state.ullTotalPhys)
+	free_ram   = i64(state.ullAvailPhys)
+	total_swap = i64(state.ullTotalPageFil)
+	free_swap  = i64(state.ullAvailPageFil)
+	ok         = true
+
+	return
 }
 
-@(init, private)
-init_gpu_info :: proc "contextless" () {
+_iterate_gpus :: proc(it: ^GPU_Iterator, minimum_vram := i64(256 * 1024 * 1024)) -> (gpu: GPU, index: int, ok: bool) {
 	GPU_ROOT_KEY :: `SYSTEM\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}`
+
+	defer it.index += 1
 
 	gpu_key: sys.HKEY
 	if status := sys.RegOpenKeyExW(
@@ -284,75 +283,64 @@ init_gpu_info :: proc "contextless" () {
 		sys.KEY_ENUMERATE_SUB_KEYS,
 		&gpu_key,
 	); status != i32(sys.ERROR_SUCCESS) {
-		return
+		return {}, it.index, false
 	}
 	defer sys.RegCloseKey(gpu_key)
 
-	gpu: ^GPU
+	buf_wstring: [100]u16
+	buf_len := u32(len(buf_wstring))
+	buf_key:     [4 * len(buf_wstring)]u8
+	buf_leaf:    [100]u8
+	leaf:        string
 
-	index     := sys.DWORD(0)
-	gpu_count := 0
-	gpu_loop: for gpu_count < MAX_GPUS {
-		defer index += 1
-
-		buf_wstring: [100]u16
-		buf_len := u32(len(buf_wstring))
-		buf_key:     [4 * len(buf_wstring)]u8
-		buf_leaf:    [100]u8
-		buf_scratch: [100]u8
+	gpu_loop: {
+		defer it._index += 1
 
 		if status := sys.RegEnumKeyW(
 			gpu_key,
-			index,
+			auto_cast it._index,
 			&buf_wstring[0],
 			&buf_len,
 		); status != i32(sys.ERROR_SUCCESS) {
-			break gpu_loop
+			return {}, it.index, false
 		}
 
 		utf16.decode_to_utf8(buf_leaf[:], buf_wstring[:])
-		leaf := string(cstring(&buf_leaf[0]))
+		leaf = string(cstring(&buf_leaf[0]))
 
 		// Skip leaves that are not of the form 000x
-		if !is_integer(leaf) {
-			continue
+		if is_integer(leaf) {
+			break gpu_loop
 		}
-
-		n := copy(buf_key[:], GPU_ROOT_KEY)
-		buf_key[n] = '\\'
-		copy(buf_key[n+1:], leaf)
-
-		key_len := len(GPU_ROOT_KEY) + len(leaf) + 1
-
-		utf16.encode_string(buf_wstring[:], string(buf_key[:key_len]))
-		key := cstring16(&buf_wstring[0])
-
-		if res, ok := read_reg_string(sys.HKEY_LOCAL_MACHINE, key, "ProviderName", buf_scratch[:]); ok {
-			if vendor, s_ok := intern_gpu_string(res); s_ok {
-				gpu = &_gpus[gpu_count]
-				gpu.vendor_name = vendor
-			} else {
-				break gpu_loop
-			}
-		} else {
-			continue
-		}
-
-		if res, ok := read_reg_string(sys.HKEY_LOCAL_MACHINE, key, "DriverDesc", buf_scratch[:]); ok {
-			if model_name, s_ok := intern_gpu_string(res); s_ok {
-				gpu = &_gpus[gpu_count]
-				gpu.model_name = model_name
-			} else {
-				break gpu_loop
-			}
-		}
-
-		if vram, ok := read_reg_i64(sys.HKEY_LOCAL_MACHINE, key, "HardwareInformation.qwMemorySize"); ok {
-			gpu.total_ram = int(vram)
-		}
-		gpu_count += 1 // not deferred at the top because it only increments if we get this far.
 	}
-	gpus = _gpus[:gpu_count]
+
+	n := copy(buf_key[:], GPU_ROOT_KEY)
+	buf_key[n] = '\\'
+	copy(buf_key[n+1:], leaf)
+
+	key_len := len(GPU_ROOT_KEY) + len(leaf) + 1
+
+	utf16.encode_string(buf_wstring[:], string(buf_key[:key_len]))
+	key := cstring16(&buf_wstring[0])
+
+	// Determine if this is a real GPU, or perhaps a screen mirroring or RDP driver
+	// Real devices tend to have more than 256 MiB of VRAM
+	gpu.vram, _ = read_reg_i64   (sys.HKEY_LOCAL_MACHINE, key, "HardwareInformation.qwMemorySize")
+	if gpu.vram < minimum_vram {
+		return
+	}
+
+	// Real devices tend to have a matching PCI device
+	matching,   _ := read_reg_string(sys.HKEY_LOCAL_MACHINE, key, "MatchingDeviceId", it._buffer[:100])
+	if !strings.has_prefix(matching, "PCI\\VEN") {
+		return
+	}
+
+	gpu.vendor, _ = read_reg_string(sys.HKEY_LOCAL_MACHINE, key, "ProviderName",  it._buffer[  0:][:100])
+	gpu.model,  _ = read_reg_string(sys.HKEY_LOCAL_MACHINE, key, "DriverDesc",    it._buffer[100:][:100])
+	gpu.driver, _ = read_reg_string(sys.HKEY_LOCAL_MACHINE, key, "DriverVersion", it._buffer[200:][:100])
+
+	return gpu, it.index, true
 }
 
 @(private)
