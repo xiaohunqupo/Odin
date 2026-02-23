@@ -52,7 +52,6 @@ dynamic_add :: proc(m: ^$D/Dynamic_Handle_Map($T, $Handle_Type), item: T, loc :=
 	i := xar.len(m.items)-1
 
 	ptr := xar.get_ptr_unsafe(&m.items, i)
-	ptr^ = item
 
 	ptr.handle.idx = auto_cast i
 	ptr.handle.gen = 1
