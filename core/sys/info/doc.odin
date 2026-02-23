@@ -7,7 +7,9 @@ and CPU information.
 On Windows, GPUs will also be enumerated using the registry.
 
 CPU feature flags can be tested against `cpu_features`, where applicable, e.g.
-`if .aes in info.cpu_features.? { ... }`
+```odin
+if .aes in info.cpu_features() { ... }
+```
 
 Example:
 	package main
@@ -24,11 +26,8 @@ Example:
 			fmt.printfln("OS:        %v", version.os)
 			fmt.printfln("Kernel:    %v", version.kernel)
 		}
-		fmt.printfln("CPU:       %v",  si.cpu_name())
-
-		if features, features_ok := si.cpu_features(); features_ok {
-			fmt.printfln("           %v", features)
-		}
+		fmt.printfln("CPU:       %v", si.cpu_name())
+		fmt.printfln("           %v", si.cpu_features())
 		if physical, logical, cores_ok := si.cpu_core_count(); cores_ok {
 			fmt.printfln("CPU cores: %vc/%vt", physical, logical)
 		}

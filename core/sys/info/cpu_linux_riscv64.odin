@@ -71,8 +71,6 @@ _init_cpu_features :: proc "contextless" () {
 		}
 	}
 
-	_features_ok = true
-
 	// hwprobe for other features.
 	{
 		pairs := []linux.RISCV_HWProbe{
@@ -109,8 +107,8 @@ _init_cpu_features :: proc "contextless" () {
 }
 
 @(private)
-_cpu_features :: proc "contextless" () -> (features: CPU_Features, ok: bool) {
-	return _features, _features_ok
+_cpu_features :: proc "contextless" () -> (features: CPU_Features) {
+	return _features
 }
 
 @(private)

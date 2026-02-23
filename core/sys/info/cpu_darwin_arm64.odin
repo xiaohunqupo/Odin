@@ -3,8 +3,8 @@ package sysinfo
 import "core:sys/unix"
 
 @(private)
-_cpu_features :: proc "contextless" () -> (features: CPU_Features, ok: bool) {
-	return _features, true
+_cpu_features :: proc "contextless" () -> (features: CPU_Features) {
+	return _features
 }
 
 @(init, private)

@@ -98,5 +98,4 @@ CPU_Features :: distinct bit_set[CPU_Feature; u64]
 
 // Looking up CPU features is expensive on RISCV, and `atomic_load_explicit`
 // is also a barrier, so we're doing this lookup only once, before `main()`
-@(private) _features:    CPU_Features
-@(private) _features_ok: bool
+@(private) _features: CPU_Features

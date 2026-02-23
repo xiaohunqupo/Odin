@@ -43,7 +43,6 @@ CPU_Features :: distinct bit_set[CPU_Feature; u64]
 
 // Retrieving CPU features on ARM is even more expensive than on Intel, so we're doing this lookup only once, before `main()`
 @(private) _features:    CPU_Features
-@(private) _features_ok: bool
 
 
 @(private) _name_buf: [256]u8

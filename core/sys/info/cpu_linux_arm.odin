@@ -8,8 +8,8 @@ import "core:strconv"
 import "core:strings"
 
 @(private)
-_cpu_features :: proc "contextless" () -> (features: CPU_Features, ok: bool) {
-	return _features, _features_ok
+_cpu_features :: proc "contextless" () -> (features: CPU_Features) {
+	return _features
 }
 
 @(init, private)
@@ -31,8 +31,6 @@ _init_cpu_features :: proc "contextless" () {
 		value = strings.trim_space(value)
 
 		if key != "Features" { continue }
-
-		_features_ok = true
 
 		for feature in strings.split_by_byte_iterator(&value, ' ') {
 			switch feature {
