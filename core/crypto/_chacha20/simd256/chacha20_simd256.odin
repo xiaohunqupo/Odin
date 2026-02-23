@@ -39,11 +39,9 @@ _VEC_TWO: simd.u64x4 : {2, 0, 2, 0}
 // is_performant returns true iff the target and current host both support
 // "enough" SIMD to make this implementation performant.
 is_performant :: proc "contextless" () -> bool {
-	features := info.cpu_features() or_return
-
 	req_features :: info.CPU_Features{.avx, .avx2}
 
-	return features >= req_features
+	return info.cpu_features() >= req_features
 }
 
 @(private = "file")

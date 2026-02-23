@@ -24,22 +24,21 @@ cpu_core_count :: proc "contextless" () -> (physical: int, logical: int, ok: boo
 }
 
 /*
-Retrieves CPU features where available
+Returns CPU features where available
 
-The results are cached
+The results are looked up before `main` enters and cached
 
 Returns:
-- features: An architecture-specific `bit_set`
-- ok:       `true` when we could retrieve the CPU features, `false` otherwise
+- features: An architecture-specific `bit_set`, empty if we couldn't retrieve them
 */
-cpu_features :: proc "contextless" () -> (features: CPU_Features, ok: bool) {
+cpu_features :: proc "contextless" () -> (features: CPU_Features) {
 	return _cpu_features()
 }
 
 /*
-Retrieves the CPU's name
+Returns the CPU's name
 
-The results are cached
+The results are looked up before `main` enters and cached
 
 Returns:
 - name: A `string` containing the CPU model name, empty if the lookup failed

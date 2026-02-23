@@ -8,7 +8,7 @@ _cpu_core_count :: proc "contextless" () -> (physical: int, logical: int, ok: bo
 
 when ODIN_ARCH == .arm32 || ODIN_ARCH == .arm64 {
 	@(private)
-	_cpu_features :: proc "contextless" () -> (features: CPU_Features, ok: bool) {
-		return {}, false
+	_cpu_features :: proc "contextless" () -> (features: CPU_Features) {
+		return {}
 	}
 }

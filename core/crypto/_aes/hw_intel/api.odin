@@ -6,8 +6,6 @@ import "core:sys/info"
 // is_supported returns true iff hardware accelerated AES
 // is supported.
 is_supported :: proc "contextless" () -> bool {
-	features := info.cpu_features() or_return
-
 	// Note: Everything with AES-NI and PCLMULQDQ has support for
 	// the required SSE extxtensions.
 	req_features :: info.CPU_Features{
@@ -17,7 +15,7 @@ is_supported :: proc "contextless" () -> bool {
 		.aes,
 		.pclmulqdq,
 	}
-	return features >= req_features
+	return info.cpu_features() >= req_features
 }
 
 // Context is a keyed AES (ECB) instance.

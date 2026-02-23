@@ -227,9 +227,7 @@ is_performant :: proc "contextless" () -> bool {
 			req_features :: info.CPU_Features{.V}
 		}
 
-		features := info.cpu_features() or_return
-
-		return features >= req_features
+		return info.cpu_features() >= req_features
 	} else when ODIN_ARCH == .wasm64p32 || ODIN_ARCH == .wasm32 {
 		return intrinsics.has_target_feature("simd128")
 	} else {

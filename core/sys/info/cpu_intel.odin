@@ -53,7 +53,6 @@ CPU_Features :: distinct bit_set[CPU_Feature; u64]
 // `cpuid` is a barrier so we try not performing this query this more than necessary.
 // `atomic_load_explicit` is also a barrier, so we're doing this lookup only once, before `main()`
 @(private) _features:    CPU_Features
-@(private) _features_ok: bool
 
 @(init, private)
 _init_cpu_features :: proc "contextless" () {
@@ -69,7 +68,6 @@ _init_cpu_features :: proc "contextless" () {
 	max_id, _, _, _ := cpuid(0, 0)
 	if max_id < 1 {
 		_features    = {}
-		_features_ok = false
 		return
 	}
 
@@ -86,8 +84,6 @@ _init_cpu_features :: proc "contextless" () {
 	try_set(&_features, .aes,       25, ecx1)
 	try_set(&_features, .os_xsave,  27, ecx1)
 	try_set(&_features, .rdrand,    30, ecx1)
-
-	_features_ok = true
 
 	when ODIN_OS == .FreeBSD || ODIN_OS == .OpenBSD || ODIN_OS == .NetBSD {
 		// xgetbv is an illegal instruction under FreeBSD 13, OpenBSD 7.1 and NetBSD 10
@@ -156,8 +152,8 @@ _init_cpu_features :: proc "contextless" () {
 }
 
 @(private)
-_cpu_features :: proc "contextless" () -> (features: CPU_Features, ok: bool) {
-	return _features, _features_ok
+_cpu_features :: proc "contextless" () -> (features: CPU_Features) {
+	return _features
 }
 
 // `cpuid` is a barrier so we try not performing this query this more than necessary.
