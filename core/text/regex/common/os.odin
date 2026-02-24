@@ -10,8 +10,16 @@ package regex_common
 		Feoramund: Initial implementation.
 */
 
-@require import "core:os"
+@(require) import "base:runtime"
+@(require) import "core:io"
+@(require) import "core:os"
+
+debug_stream: io.Stream
 
 when ODIN_DEBUG_REGEX {
-	debug_stream := os.stderr.stream
+	@(init)
+	init_debug_stream :: proc "contextless" () {
+		context = runtime.default_context()
+		debug_stream = os.to_stream(os.stderr)
+	}
 }
