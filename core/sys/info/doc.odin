@@ -6,10 +6,8 @@ and CPU information.
 
 On Windows, GPUs will also be enumerated using the registry.
 
-CPU feature flags can be tested against `cpu_features`, where applicable, e.g.
-```odin
-if .aes in info.cpu_features() { ... }
-```
+CPU feature flags can be tested against `cpu_features`, where applicable, e.g.:
+`if .aes in info.cpu_features() { ... }`
 
 Example:
 	package main
@@ -47,61 +45,63 @@ Example:
 		}
 	}
 
-- Example Windows output:
+	/*
+	Example Windows output:
 
-	Odin:      dev-2026-02
-	OS (full): Windows 10 Professional (version: 22H2), build: 19045.6575
-	OS (rel):  22H2
-	OS:        Version{major = 10, minor = 0, patch = 0}
-	Kernel:    Version{major = 10, minor = 19045, patch = 6575}
-	CPU:       AMD Ryzen 9 5950X 16-Core Processor
-	           CPU_Features{aes, adx, avx, avx2, bmi1, bmi2, erms, fma, os_xsave, pclmulqdq, popcnt, rdrand, rdseed, sha, sse2, sse3, ssse3, sse41, sse42}
-	CPU cores: 16c/32t
-	RAM:       32.1 GiB/63.9 GiB
-	SWAP:      21.6 GiB/73.4 GiB
+		Odin:      dev-2026-02
+		OS (full): Windows 10 Professional (version: 22H2), build: 19045.6575
+		OS (rel):  22H2
+		OS:        Version{major = 10, minor = 0, patch = 0}
+		Kernel:    Version{major = 10, minor = 19045, patch = 6575}
+		CPU:       AMD Ryzen 9 5950X 16-Core Processor
+		           CPU_Features{aes, adx, avx, avx2, bmi1, bmi2, erms, fma, os_xsave, pclmulqdq, popcnt, rdrand, rdseed, sha, sse2, sse3, ssse3, sse41, sse42}
+		CPU cores: 16c/32t
+		RAM:       32.1 GiB/63.9 GiB
+		SWAP:      21.6 GiB/73.4 GiB
 
-	GPU #0:
-		Vendor: Advanced Micro Devices, Inc.
-		Model:  AMD Radeon RX 9070
-		VRAM:   15.9 GiB
+		GPU #0:
+			Vendor: Advanced Micro Devices, Inc.
+			Model:  AMD Radeon RX 9070
+			VRAM:   15.9 GiB
 
-- Example Linux output:
+	Example Linux output:
 
-	Odin:      dev-2026-02
-	OS (full): Ubuntu 24.04.3 LTS, Linux 6.6.87.2-microsoft-standard-WSL2
-	OS (rel):  microsoft-standard-WSL2
-	OS:        Version{major = 24, minor = 4, patch = 3}
-	Kernel:    Version{major = 6, minor = 6, patch = 87}
-	CPU:       AMD Ryzen 9 5950X 16-Core Processor
-	           CPU_Features{aes, adx, avx, avx2, bmi1, bmi2, erms, fma, os_xsave, pclmulqdq, popcnt, rdrand, rdseed, sha, sse2, sse3, ssse3, sse41, sse42}
-	CPU cores: 16c/32t
-	RAM:       29.2 GiB/31.3 GiB
-	SWAP:      8.0 GiB/8.0 GiB
+		Odin:      dev-2026-02
+		OS (full): Ubuntu 24.04.3 LTS, Linux 6.6.87.2-microsoft-standard-WSL2
+		OS (rel):  microsoft-standard-WSL2
+		OS:        Version{major = 24, minor = 4, patch = 3}
+		Kernel:    Version{major = 6, minor = 6, patch = 87}
+		CPU:       AMD Ryzen 9 5950X 16-Core Processor
+		           CPU_Features{aes, adx, avx, avx2, bmi1, bmi2, erms, fma, os_xsave, pclmulqdq, popcnt, rdrand, rdseed, sha, sse2, sse3, ssse3, sse41, sse42}
+		CPU cores: 16c/32t
+		RAM:       29.2 GiB/31.3 GiB
+		SWAP:      8.0 GiB/8.0 GiB
 
-- Example macOS output:
+	Example macOS output:
 
-	Odin:      dev-2026-02
-	OS (full): macOS Tahoe 26.3.0 (build 25D125, kernel 25.3.0)
-	OS (rel):  25D125
-	OS:        Version{major = 26, minor = 3, patch = 0}
-	Kernel:    Version{major = 25, minor = 3, patch = 0}
-	CPU:       Apple M4 Pro
-	           CPU_Features{asimd, floatingpoint, asimdhp, bf16, fcma, fhm, fp16, frint, i8mm, jscvt, rdm, flagm, flagm2, crc32, lse, lrcpc, lrcpc2, aes, pmull, sha1, sha256, sha512, sha3, sb}
-	CPU cores: 12c/12t
-	RAM:       0.0 B/24.0 GiB
-	SWAP:      0.0 B/0.0 B
+		Odin:      dev-2026-02
+		OS (full): macOS Tahoe 26.3.0 (build 25D125, kernel 25.3.0)
+		OS (rel):  25D125
+		OS:        Version{major = 26, minor = 3, patch = 0}
+		Kernel:    Version{major = 25, minor = 3, patch = 0}
+		CPU:       Apple M4 Pro
+		           CPU_Features{asimd, floatingpoint, asimdhp, bf16, fcma, fhm, fp16, frint, i8mm, jscvt, rdm, flagm, flagm2, crc32, lse, lrcpc, lrcpc2, aes, pmull, sha1, sha256, sha512, sha3, sb}
+		CPU cores: 12c/12t
+		RAM:       0.0 B/24.0 GiB
+		SWAP:      0.0 B/0.0 B
 
-- Example FreeBSD output:
+	Example FreeBSD output:
 
-	Odin:      dev-2026-02
-	OS (full): FreeBSD 15.0-RELEASE-p2 releng/15.0-n281005-5fb0f8e9e61d GENERIC, revision 199506
-	OS (rel):
-	OS:        Version{major = 15, minor = 0, patch = 199506}
-	Kernel:    Version{major = 15, minor = 0, patch = 199506}
-	CPU:       AMD Ryzen 9 5950X 16-Core Processor
-	           CPU_Features{aes, fma, os_xsave, pclmulqdq, popcnt, rdrand, sse2, sse3, ssse3, sse41, sse42}
-	RAM:       7.6 GiB/7.9 GiB
-	SWAP:      0.0 B/0.0 B
+		Odin:      dev-2026-02
+		OS (full): FreeBSD 15.0-RELEASE-p2 releng/15.0-n281005-5fb0f8e9e61d GENERIC, revision 199506
+		OS (rel):
+		OS:        Version{major = 15, minor = 0, patch = 199506}
+		Kernel:    Version{major = 15, minor = 0, patch = 199506}
+		CPU:       AMD Ryzen 9 5950X 16-Core Processor
+		           CPU_Features{aes, fma, os_xsave, pclmulqdq, popcnt, rdrand, sse2, sse3, ssse3, sse41, sse42}
+		RAM:       7.6 GiB/7.9 GiB
+		SWAP:      0.0 B/0.0 B
+	*/
 */
 package sysinfo
 
