@@ -1,9 +1,11 @@
-// A priority queue data structure.
 package container_priority_queue
 
 import "base:builtin"
 import "base:runtime"
 
+// Priority Queue.
+//
+// Important: Must be `init`ialized with `less` and `swap` procedures before use. See `doc.odin` for an example.
 Priority_Queue :: struct($T: typeid) {
 	queue: [dynamic]T,
 	

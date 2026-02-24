@@ -3,13 +3,13 @@ package test_core_container
 import "core:container/xar"
 import "core:testing"
 
-Value :: struct {
-	v: int,
-	p: ^int,
-}
-
 @test
 test_xar_pointer_stability :: proc(t: ^testing.T) {
+	Value :: struct {
+		v: int,
+		p: ^int,
+	}
+
 	x: xar.Array(int, 4)
 	defer xar.destroy(&x)
 
