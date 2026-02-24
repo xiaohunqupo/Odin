@@ -63,6 +63,7 @@ Example:
 			Vendor: Advanced Micro Devices, Inc.
 			Model:  AMD Radeon RX 9070
 			VRAM:   15.9 GiB
+			Driver: 32.0.22029.1019
 
 	Example Linux output:
 
