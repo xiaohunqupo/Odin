@@ -7421,6 +7421,8 @@ gb_internal CallArgumentData check_call_arguments_proc_group(CheckerContext *c, 
 		spaces[max_spaces] = 0;
 
 		{
+			// TODO(bill): This is absolutely awful code, that needs improving a lot
+
 			bool try_addr = false;
 			isize try_addr_idx = -1;
 

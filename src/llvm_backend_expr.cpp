@@ -2971,6 +2971,7 @@ gb_internal lbValue lb_emit_comp(lbProcedure *p, TokenKind op_kind, lbValue left
 		return nil_check;
 	}
 
+
 	if (are_types_identical(a, b)) {
 		// NOTE(bill): No need for a conversion
 	} else if ((lb_is_const(left) && !is_type_array(left.type)) || lb_is_const_nil(left)) {
@@ -2983,15 +2984,20 @@ gb_internal lbValue lb_emit_comp(lbProcedure *p, TokenKind op_kind, lbValue left
 			if (internal_check_is_assignable_to(right.type, left.type)) {
 				right = lb_emit_conv(p, right, left.type);
 			}
-			return lb_emit_comp_against_nil(p, op_kind, right);
+			if (LLVMTypeOf(left.value) == LLVMTypeOf(right.value)) {
+				return lb_emit_comp_against_nil(p, op_kind, right);
+			}
 		}
 		left = lb_emit_conv(p, left, right.type);
 	} else if ((lb_is_const(right) && !is_type_array(right.type)) || lb_is_const_nil(right)) {
+
 		if (lb_is_const_nil(right)) {
 			if (internal_check_is_assignable_to(left.type, right.type)) {
 				left = lb_emit_conv(p, left, right.type);
 			}
-			return lb_emit_comp_against_nil(p, op_kind, left);
+			if (LLVMTypeOf(left.value) == LLVMTypeOf(right.value)) {
+				return lb_emit_comp_against_nil(p, op_kind, left);
+			}
 		}
 		right = lb_emit_conv(p, right, left.type);
 	} else {
