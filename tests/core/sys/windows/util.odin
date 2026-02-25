@@ -32,3 +32,94 @@ utf16_to_utf8_buf_test :: proc(t: ^testing.T) {
 		testing.expect_value(t, res, test.ustr)
 	}
 }
+
+@(test)
+utf8_to_utf16_buf_test :: proc(t: ^testing.T) {
+	buf : [100]u16 = ---
+	// Test everything with a dirty buffer!
+	reset_buffer :: proc(buf : []u16) {
+		for i in 0 ..< len(buf) do buf[i] = cast(u16)(i + 1)
+	}
+
+	result : []u16
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_utf16_buf(buf[:], "Hello\x00, World!")
+	testing.expect_value(t, len(result), 14)
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_utf16_buf(buf[:], "你好，世界！")
+	testing.expect_value(t, len(result), 6)
+	testing.expect_value(t, result[0], 0x4F60)
+	testing.expect_value(t, result[1], 0x597D)
+	testing.expect_value(t, result[2], 0xFF0C)
+	testing.expect_value(t, result[3], 0x4E16)
+	testing.expect_value(t, result[4], 0x754C)
+	testing.expect_value(t, result[5], 0xFF01)
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_utf16_buf(buf[:4], "Hello")
+	// Buffer too short.
+	testing.expect(t, result == nil)
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_utf16_buf(buf[:], "")
+	// Valid, but indistinguishable from an error.
+	testing.expect_value(t, len(result), 0)
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_utf16_buf(buf[:0], "Hello")
+	// Buffer too short.
+	testing.expect(t, result == nil)
+}
+
+@(test)
+utf8_to_wstring_buf_test :: proc(t : ^testing.T) {
+	buf : [100]u16 = ---
+	// Test everything with a dirty buffer!
+	reset_buffer :: proc(buf : []u16) {
+		for i in 0 ..< len(buf) do buf[i] = cast(u16)(i + 1)
+	}
+
+	result : win32.wstring
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_wstring_buf(buf[:], "Hello\x00, World!")
+	testing.expect(t, result != nil)
+	testing.expect_value(t, buf[13], '!')
+	testing.expect_value(t, buf[14], 0)
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_wstring_buf(buf[:], "你好，世界！")
+	testing.expect(t, result != nil)
+	testing.expect_value(t, buf[0], 0x4F60)
+	testing.expect_value(t, buf[1], 0x597D)
+	testing.expect_value(t, buf[2], 0xFF0C)
+	testing.expect_value(t, buf[3], 0x4E16)
+	testing.expect_value(t, buf[4], 0x754C)
+	testing.expect_value(t, buf[5], 0xFF01)
+	testing.expect_value(t, buf[6], 0)
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_wstring_buf(buf[:5], "Hello")
+	// Buffer too short.
+	testing.expect_value(t, result, nil)
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_wstring_buf(buf[:6], "Hello")
+	// Buffer *just* long enough.
+	testing.expect(t, result != nil)
+	testing.expect_value(t, buf[4], 'o')
+	testing.expect_value(t, buf[5], 0)
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_wstring_buf(buf[:], "")
+	// Valid, and distinguishable from an error.
+	testing.expect(t, result != nil)
+	testing.expect_value(t, buf[0], 0)
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_wstring_buf(buf[:0], "Hello")
+	// Buffer too short.
+	testing.expect(t, result == nil)
+}

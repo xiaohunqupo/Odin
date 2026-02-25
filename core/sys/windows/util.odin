@@ -117,23 +117,27 @@ utf8_to_utf16_alloc :: proc(s: string, allocator := context.temp_allocator) -> [
 	return text[:n]
 }
 
+// Does not null-terminate the result.
 @(require_results)
 utf8_to_utf16_buf :: proc(buf: []u16, s: string) -> []u16 {
-	n1 := MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, raw_data(s), c_int(len(s)), nil, 0)
-	if n1 == 0 {
-		return nil
-	} else if int(n1) > len(buf) {
-		return nil
-	}
-
-	n1 = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, raw_data(s), c_int(len(s)), raw_data(buf[:]), n1)
-	if n1 == 0 {
-		return nil
-	} else if int(n1) > len(buf) {
+	buf_length := len(buf)
+	if buf_length == 0 {
+		// This case must be handled separately because MultiByteToWideChar would interpret
+		// a buffer length of 0 as a request to calculate the required buffer size.
 		return nil
 	}
-	return buf[:n1]
+	if buf_length > cast(int)max(c_int) {
+		// Unsupported.
+		return nil
+	}
+	elements_written := MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, raw_data(s), c_int(len(s)), raw_data(buf[:]), cast(c_int)buf_length)
+	if elements_written == 0 {
+		// Insufficient buffer size or invalid characters. Contents of the buffer may have been modified.
+		return nil
+	}
+	return buf[:elements_written]
 }
+
 utf8_to_utf16 :: proc{utf8_to_utf16_alloc, utf8_to_utf16_buf}
 
 @(require_results)
@@ -146,10 +150,28 @@ utf8_to_wstring_alloc :: proc(s: string, allocator := context.temp_allocator) ->
 
 @(require_results)
 utf8_to_wstring_buf :: proc(buf: []u16, s: string) -> wstring {
-	if res := utf8_to_utf16(buf, s); len(res) > 0 {
-		return wstring(raw_data(res))
+	buf_length := len(buf)
+	if buf_length == 0 {
+		// We cannot even provide an empty string with a terminating null character.
+		return nil
 	}
-	return nil
+	if len(s) == 0 {
+		// Empty string. Needs special care here because here, an empty string
+		// is different from conversion failure.
+		buf[0] = 0
+		return wstring(raw_data(buf))
+	}
+	// We will need to append the terminating null character.
+	// utf8_to_utf16 does not do that.
+	res := utf8_to_utf16(buf[:buf_length-1], s)
+	res_length := len(res)
+	if res_length == 0 {
+		// Conversion failure.
+		return nil
+	}
+	assert(res_length < buf_length)
+	buf[res_length] = 0
+	return wstring(raw_data(res))
 }
 
 utf8_to_wstring :: proc{utf8_to_wstring_alloc, utf8_to_wstring_buf}
