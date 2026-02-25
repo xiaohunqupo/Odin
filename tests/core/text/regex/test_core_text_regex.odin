@@ -564,6 +564,10 @@ test_non_word_boundaries :: proc(t: ^testing.T) {
 		EXPR :: `.+\B`
 		check_expression(t, EXPR, "abc", "ab")
 	}
+	{
+		EXPR :: `\B'`
+		check_expression(t, EXPR, "'", "'")
+	}
 }
 
 @test

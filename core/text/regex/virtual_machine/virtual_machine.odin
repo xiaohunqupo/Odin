@@ -204,15 +204,8 @@ add_thread :: proc(vm: ^Machine, saved: ^[2 * common.MAX_CAPTURE_GROUPS]int, pc:
 		case .Assert_Word_Boundary:
 			sp := vm.string_pointer+vm.current_rune_size
 
-			left_is_wc := false
-			if sp > 0 {
-				left_is_wc = is_word_class(vm.current_rune)
-			}
-
-			right_is_wc := false
-			if sp < len(vm.memory) {
-				right_is_wc = is_word_class(vm.next_rune)
-			}
+			left_is_wc := sp > 0 && is_word_class(vm.current_rune)
+			right_is_wc := sp < len(vm.memory) && is_word_class(vm.next_rune)
 
 			if left_is_wc != right_is_wc {
 				pc += size_of(Opcode)
@@ -221,14 +214,13 @@ add_thread :: proc(vm: ^Machine, saved: ^[2 * common.MAX_CAPTURE_GROUPS]int, pc:
 
 		case .Assert_Non_Word_Boundary:
 			sp := vm.string_pointer+vm.current_rune_size
-			if sp != 0 && sp != len(vm.memory) {
-				last_rune_is_wc := is_word_class(vm.current_rune)
-				this_rune_is_wc := is_word_class(vm.next_rune)
 
-				if last_rune_is_wc && this_rune_is_wc || !last_rune_is_wc && !this_rune_is_wc {
-					pc += size_of(Opcode)
-					continue
-				}
+			left_is_wc := sp > 0 && is_word_class(vm.current_rune)
+			right_is_wc := sp < len(vm.memory) && is_word_class(vm.next_rune)
+
+			if left_is_wc == right_is_wc {
+				pc += size_of(Opcode)
+				continue
 			}
 
 		case .Wait_For_Byte:
