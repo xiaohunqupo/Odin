@@ -1270,6 +1270,16 @@ iterator_vectors := []Iterator_Test{
 			{pos = {{0, 2}}, groups = {"a\n"}},
 		},
 	},
+	// https://github.com/odin-lang/Odin/issues/6323
+	// Test `\b` in iterator
+	{
+		"can, can't, 'can't'", `\b[a-z0-9']+\b`, {},
+		{
+			{pos = {{0, 3}},   groups = {"can"}},
+			{pos = {{5, 10}},  groups = {"can't"}},
+			{pos = {{13, 18}}, groups = {"can't"}},
+		},
+	}
 }
 
 @test
