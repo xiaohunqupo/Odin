@@ -1,14 +1,14 @@
 package bufio
 
+import "base:runtime"
 import "core:io"
-import "core:mem"
 import "core:unicode/utf8"
 import "core:bytes"
 
 // Reader is a buffered wrapper for an io.Reader
 Reader :: struct {
 	buf:            []byte,
-	buf_allocator:  mem.Allocator,
+	buf_allocator:  runtime.Allocator,
 
 	rd:             io.Reader, // reader
 	r, w:           int, // read and write positions for buf
