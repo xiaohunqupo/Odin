@@ -1,5 +1,5 @@
 /*
-Handle-based map using fixed-length arrays.
+Handle-based map using either fixed-length arrays, or exponential arrays from "core:container/xar".
 
 Example:
 	import hm "core:container/handle_map"
