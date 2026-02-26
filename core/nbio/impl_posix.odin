@@ -1154,6 +1154,8 @@ stat_exec :: proc(op: ^Operation) {
 
 add_pending :: proc(op: ^Operation, filter: kq.Filter, ident: uintptr) {
 	debug("adding pending", op.type)
+	op._impl.next = nil
+	op._impl.prev = nil
 	op._impl.flags += {.For_Kernel}
 
 	_, val, just_inserted, err := map_entry(&op.l.submitted, Queue_Identifier{ ident = ident, filter = filter })
