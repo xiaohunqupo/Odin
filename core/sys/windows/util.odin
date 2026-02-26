@@ -121,21 +121,27 @@ utf8_to_utf16_alloc :: proc(s: string, allocator := context.temp_allocator) -> [
 utf8_to_utf16_buf :: proc(buf: []u16, s: string) -> []u16 {
 	buf_length := len(buf)
 	if buf_length == 0 {
-		// This case must be handled separately because MultiByteToWideChar would interpret
-		// a buffer length of 0 as a request to calculate the required buffer size.
+		return nil
+	}
+	s_length := len(s)
+	if s_length == 0 {
+		return nil
+	}
+	if s_length > cast(int)max(c_int) {
+		// Unsupported (input string is excessively long).
 		return nil
 	}
 	if buf_length > cast(int)max(c_int) {
 		buf_length = cast(int)max(c_int)
 	}
-	elements_written := MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, raw_data(s), c_int(len(s)), raw_data(buf[:]), cast(c_int)buf_length)
+	elements_written := MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, raw_data(s), c_int(s_length), raw_data(buf), cast(c_int)buf_length)
 	if elements_written == 0 {
 		// Insufficient buffer size, empty input string, or invalid characters. Contents of the buffer may have been modified.
 		return nil
 	}
 
 	// To be consistent with utf8_to_utf16_alloc, the output string
-	// is null-terminated here in the buffer, even if the terminating null character
+	// is null-terminated here in the buffer, even though the terminating null character
 	// is not part of the returned slice.
 	if buf_length < cast(int)elements_written + 1 {
 		// The terminating null character does not fit.
@@ -145,8 +151,16 @@ utf8_to_utf16_buf :: proc(buf: []u16, s: string) -> []u16 {
 	return buf[:elements_written]
 }
 
-// Converts each UTF-8 code point to UTF-16, including any amount of null characters.
-// The resulting slice
+// Converts a regular UTF-8 `string` to UTF-16.
+//
+// The conversion includes any null characters present in the input string.
+//
+// Returns `nil` on conversion failure.
+//
+// Conversion may fail due to an invalid byte sequence in the input string,
+// or an insufficient buffer size (`utf8_to_utf16_buf` only).
+//
+// The result of converting an empty string is indistinguishable from conversion failure.
 utf8_to_utf16 :: proc{utf8_to_utf16_alloc, utf8_to_utf16_buf}
 
 @(require_results)
@@ -158,9 +172,9 @@ utf8_to_wstring_alloc :: proc(s: string, allocator := context.temp_allocator) ->
 		buf[0] = 0
 		return wstring(raw_data(buf))
 	}
-	// utf8_to_utf16_alloc null-terminates the result in the allocated memory block,
+	// utf8_to_utf16 null-terminates the result in the allocated memory block,
 	// however, the null character is not part of the returned slice (it is just beyond).
-	// The conversion to wstring will lose this implicit overrun.
+	// The conversion to wstring will bypass this implicit overrun.
 	res := utf8_to_utf16(s, allocator)
 	if len(res) > 0 {
 		return wstring(raw_data(res))
@@ -183,6 +197,9 @@ utf8_to_wstring_buf :: proc(buf: []u16, s: string) -> wstring {
 		buf[0] = 0
 		return wstring(raw_data(buf))
 	}
+	// utf8_to_utf16 null-terminates the result in the buffer,
+	// however, the null character is not part of the returned slice (it is just beyond).
+	// The conversion to wstring will bypass this implicit overrun.
 	res := utf8_to_utf16(buf[:], s)
 	if len(res) > 0 {
 		return wstring(raw_data(res))
@@ -192,10 +209,13 @@ utf8_to_wstring_buf :: proc(buf: []u16, s: string) -> wstring {
 	}
 }
 
-// Returns a null-termianted wstring, or nil on conversion failure.
-// Conversion failure may happen due to an invalid byte sequence in the input string,
-// or an insufficient buffer size (utf8_to_wstring_buf only).
-// An empty string is valid, and distinct from nil.
+// Converts a regular UTF-8 `string` to UTF-16, and returns the result as a
+// null-terminated `wstring`, or `nil` on conversion failure.
+//
+// Conversion may fail due to an invalid byte sequence in the input string,
+// or an insufficient buffer size (`utf8_to_wstring_buf` only).
+//
+// An empty string is valid, and results in a value distinct from `nil`.
 utf8_to_wstring :: proc{utf8_to_wstring_alloc, utf8_to_wstring_buf}
 
 @(require_results)
