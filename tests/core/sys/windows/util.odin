@@ -38,7 +38,9 @@ utf8_to_utf16_buf_test :: proc(t: ^testing.T) {
 	buf : [100]u16 = ---
 	// Test everything with a dirty buffer!
 	reset_buffer :: proc(buf : []u16) {
-		for i in 0 ..< len(buf) do buf[i] = cast(u16)(i + 1)
+		for i in 0 ..< len(buf) {
+			buf[i] = cast(u16)(i + 1)
+		}
 	}
 
 	result : []u16
@@ -46,6 +48,16 @@ utf8_to_utf16_buf_test :: proc(t: ^testing.T) {
 	reset_buffer(buf[:])
 	result = win32.utf8_to_utf16_buf(buf[:], "Hello\x00, World!")
 	testing.expect_value(t, len(result), 14)
+	testing.expect_value(t, result[4], 'o')
+	testing.expect_value(t, result[5], 0)
+	testing.expect_value(t, result[6], ',')
+	testing.expect_value(t, result[13], '!')
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_utf16_buf(buf[:], "H\x00\x00")
+	testing.expect_value(t, len(result), 3)
+	testing.expect_value(t, result[1], 0)
+	testing.expect_value(t, result[2], 0)
 
 	reset_buffer(buf[:])
 	result = win32.utf8_to_utf16_buf(buf[:], "你好，世界！")
@@ -78,7 +90,9 @@ utf8_to_wstring_buf_test :: proc(t : ^testing.T) {
 	buf : [100]u16 = ---
 	// Test everything with a dirty buffer!
 	reset_buffer :: proc(buf : []u16) {
-		for i in 0 ..< len(buf) do buf[i] = cast(u16)(i + 1)
+		for i in 0 ..< len(buf) {
+			buf[i] = cast(u16)(i + 1)
+		}
 	}
 
 	result : win32.wstring
@@ -88,6 +102,11 @@ utf8_to_wstring_buf_test :: proc(t : ^testing.T) {
 	testing.expect(t, result != nil)
 	testing.expect_value(t, buf[13], '!')
 	testing.expect_value(t, buf[14], 0)
+
+	reset_buffer(buf[:])
+	result = win32.utf8_to_wstring_buf(buf[:], "H\x00\x00")
+	testing.expect(t, result != nil)
+	testing.expect_value(t, buf[1], 0)
 
 	reset_buffer(buf[:])
 	result = win32.utf8_to_wstring_buf(buf[:], "你好，世界！")
