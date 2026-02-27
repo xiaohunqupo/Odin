@@ -91,20 +91,28 @@ LANGIDFROMLCID :: #force_inline proc "contextless" (lcid: LCID) -> LANGID {
 
 @(require_results)
 utf8_to_utf16_alloc :: proc(s: string, allocator := context.temp_allocator) -> []u16 {
-	if len(s) < 1 {
+	s_length := len(s)
+	if s_length < 1 {
+		return nil
+	}
+	if s_length > cast(int)max(c_int) {
+		// Unsupported (input string is excessively long).
 		return nil
 	}
 
 	b := transmute([]byte)s
 	cstr := raw_data(b)
-	n := MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cstr, c_int(len(s)), nil, 0)
+	n := MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cstr, c_int(s_length), nil, 0)
 	if n == 0 {
 		return nil
 	}
 
 	text := make([]u16, n+1, allocator)
+	if text == nil {
+		return nil
+	}
 
-	n1 := MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cstr, c_int(len(s)), raw_data(text), n)
+	n1 := MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cstr, c_int(s_length), raw_data(text), n)
 	if n1 == 0 {
 		delete(text, allocator)
 		return nil
@@ -158,7 +166,8 @@ utf8_to_utf16_buf :: proc(buf: []u16, s: string) -> []u16 {
 // Returns `nil` on conversion failure.
 //
 // Conversion may fail due to an invalid byte sequence in the input string,
-// or an insufficient buffer size (`utf8_to_utf16_buf` only).
+// or an insufficient buffer size (`utf8_to_utf16_buf` only),
+// or allocation failure (`utf8_to_utf16_alloc` only).
 //
 // The result of converting an empty string is indistinguishable from conversion failure.
 utf8_to_utf16 :: proc{utf8_to_utf16_alloc, utf8_to_utf16_buf}
@@ -169,6 +178,9 @@ utf8_to_wstring_alloc :: proc(s: string, allocator := context.temp_allocator) ->
 		// Empty string. Needs special care because an empty string
 		// is different from conversion failure.
 		buf := make([]u16, 1, allocator)
+		if buf == nil {
+			return nil
+		}
 		buf[0] = 0
 		return wstring(raw_data(buf))
 	}
@@ -213,7 +225,8 @@ utf8_to_wstring_buf :: proc(buf: []u16, s: string) -> wstring {
 // null-terminated `wstring`, or `nil` on conversion failure.
 //
 // Conversion may fail due to an invalid byte sequence in the input string,
-// or an insufficient buffer size (`utf8_to_wstring_buf` only).
+// or an insufficient buffer size (`utf8_to_wstring_buf` only),
+// or allocation failure (`utf8_to_wstring_alloc` only).
 //
 // An empty string is valid, and results in a value distinct from `nil`.
 utf8_to_wstring :: proc{utf8_to_wstring_alloc, utf8_to_wstring_buf}
