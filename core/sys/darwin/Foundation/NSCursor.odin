@@ -3,6 +3,14 @@ package objc_Foundation
 @(objc_class="NSCursor")
 Cursor :: struct {using _: Object}
 
+@(objc_type=Cursor, objc_name="alloc", objc_is_class_method=true)
+Cursor_alloc :: proc "c" () -> ^Cursor {
+	return msgSend(^Cursor, Cursor, "alloc")
+}
+@(objc_type=Cursor, objc_name="initWithImage")
+Cursor_initWithImage :: proc "c" (self: ^Cursor, image: ^Image, hotSpot: Point) -> ^Cursor {
+	return msgSend(^Cursor, self, "initWithImage:hotSpot:", image, hotSpot)
+}
 @(objc_type=Cursor, objc_name="hide", objc_is_class_method=true)
 Cursor_hide :: proc() {
 	msgSend(nil, Cursor, "hide")
