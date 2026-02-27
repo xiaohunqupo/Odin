@@ -256,3 +256,50 @@ wake_up :: proc(t: ^testing.T) {
 		}
 	}
 }
+
+// Tests that if multiple accepts are queued, and a dial comes in which completes one of them,
+// the rest are queued again properly.
+@(test)
+still_pending :: proc(t: ^testing.T) {
+	if event_loop_guard(t) {
+		testing.set_fail_timeout(t, time.Minute)
+
+		sock, ep := open_next_available_local_port(t)
+		defer nbio.close(sock)
+
+		N :: 3
+
+		State :: struct {
+			accepted: int,
+		}
+		state: State
+
+		on_accept :: proc(op: ^nbio.Operation, t: ^testing.T, state: ^State) {
+			ev(t, op.accept.err, nil)
+			state.accepted += 1
+			nbio.close(op.accept.client)
+		}
+
+		on_dial :: proc(op: ^nbio.Operation, t: ^testing.T) {
+			ev(t, op.dial.err, nil)
+			nbio.close(op.dial.socket)
+		}
+
+		for _ in 0..<N {
+			nbio.accept_poly2(sock, t, &state, on_accept)
+		}
+
+		nbio.dial_poly(ep, t, on_dial)
+
+		for state.accepted < 1 {
+			ev(t, nbio.tick(), nil)
+		}
+
+		for _ in 0..<N-1 {
+			nbio.dial_poly(ep, t, on_dial)
+		}
+
+		ev(t, nbio.run(), nil)
+		ev(t, state.accepted, N)
+ 	}
+ }
