@@ -336,6 +336,12 @@ __tick :: proc(l: ^Event_Loop, timeout: time.Duration) -> General_Error {
 				if .Error in event.flags { curr._impl.flags += {.Error} }
 				if .EOF   in event.flags { curr._impl.flags += {.EOF} }
 				curr._impl.result = event.data
+
+				// Remove refs to the list in case the operation would still block and `add_pending`
+				// is executed on it again.
+				curr._impl.prev = nil
+				curr._impl.next = nil
+
 				handle_completed(curr)
 			}
 		}
@@ -1154,8 +1160,8 @@ stat_exec :: proc(op: ^Operation) {
 
 add_pending :: proc(op: ^Operation, filter: kq.Filter, ident: uintptr) {
 	debug("adding pending", op.type)
-	op._impl.next = nil
-	op._impl.prev = nil
+	assert(op._impl.next == nil)
+	assert(op._impl.prev == nil)
 	op._impl.flags += {.For_Kernel}
 
 	_, val, just_inserted, err := map_entry(&op.l.submitted, Queue_Identifier{ ident = ident, filter = filter })

@@ -257,77 +257,49 @@ wake_up :: proc(t: ^testing.T) {
 	}
 }
 
+// Tests that if multiple accepts are queued, and a dial comes in which completes one of them,
+// the rest are queued again properly.
 @(test)
-reused_ops :: proc(t: ^testing.T) {
+still_pending :: proc(t: ^testing.T) {
 	if event_loop_guard(t) {
 		testing.set_fail_timeout(t, time.Minute)
 
-		@static payload := [4]byte{'P', 'I', 'N', 'G'}
 		sock, ep := open_next_available_local_port(t)
+		defer nbio.close(sock)
+
+		N :: 3
 
 		State :: struct {
-			listener:      nbio.TCP_Socket,
-			accepts:       [4]^nbio.Operation,
-			client:        nbio.TCP_Socket,
-			server_client: nbio.TCP_Socket,
-			recv_buf:      [4]byte,
-			recv_done:     bool,
+			accepted: int,
 		}
+		state: State
 
-		state := State{
-			listener = sock,
-		}
-
-		on_accept :: proc(op: ^nbio.Operation, t: ^testing.T, state: ^State, slot: int) {
-			if state.recv_done {
-				nbio.close(op.accept.client)
-				return
-			}
-
+		on_accept :: proc(op: ^nbio.Operation, t: ^testing.T, state: ^State) {
 			ev(t, op.accept.err, nil)
-			if state.server_client == 0 {
-				state.server_client = op.accept.client
-				nbio.recv_poly2(state.server_client, {state.recv_buf[:]}, t, state, on_recv, timeout=0)
-			}
-
-			state.accepts[slot] = nbio.accept_poly3(op.accept.socket, t, state, slot, on_accept, timeout=nbio.NO_TIMEOUT)
+			state.accepted += 1
+			nbio.close(op.accept.client)
 		}
 
-		on_recv :: proc(op: ^nbio.Operation, t: ^testing.T, state: ^State) {
-			ev(t, op.recv.err, nil)
-			ev(t, op.recv.received, 4)
-			ev(t, state.recv_buf, payload)
-			state.recv_done = true
-
-			for accept in state.accepts {
-				if accept != nil {
-					nbio.remove(accept)
-				}
-			}
-
-			nbio.close(state.server_client)
-			nbio.close(state.client)
-			nbio.close(state.listener)
-		}
-
-		on_dial :: proc(op: ^nbio.Operation, t: ^testing.T, state: ^State) {
+		on_dial :: proc(op: ^nbio.Operation, t: ^testing.T) {
 			ev(t, op.dial.err, nil)
-			state.client = op.dial.socket
-			nbio.send_poly2(state.client, {payload[:]}, t, state, on_send)
+			nbio.close(op.dial.socket)
 		}
 
-		on_send :: proc(op: ^nbio.Operation, t: ^testing.T, state: ^State) {
-			ev(t, op.send.err, nil)
-			ev(t, op.send.sent, (4))
+		for _ in 0..<N {
+			nbio.accept_poly2(sock, t, &state, on_accept)
 		}
 
-		for slot in 0 ..< 4 {
-			state.accepts[slot] = nbio.accept_poly3(sock, t, &state, slot, on_accept, timeout=nbio.NO_TIMEOUT)
-		}
-		ev(t, nbio.tick(0), nil)
+		nbio.dial_poly(ep, t, on_dial)
 
-		nbio.dial_poly2(ep, t, &state, on_dial)
+		for state.accepted < 1 {
+			ev(t, nbio.tick(), nil)
+		}
+
+		for _ in 0..<N-1 {
+			nbio.dial_poly(ep, t, on_dial)
+		}
+
 		ev(t, nbio.run(), nil)
-		e(t, state.recv_done)
+		ev(t, state.accepted, N)
  	}
  }
