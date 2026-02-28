@@ -103,17 +103,21 @@ utf8_to_utf16_alloc :: proc(s: string, allocator := context.temp_allocator) -> [
 	b := transmute([]byte)s
 	cstr := raw_data(b)
 	n := MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cstr, c_int(s_length), nil, 0)
-	if n == 0 {
+	if n <= 0 || cast(int)n >= max(int) {
+		// If n is equal to or greater than max(int), then we will not be able
+		// to create a big enough slice with the null terminator.
+		// NOTE: This only affects 32-bit systems and is purely pedantic because
+		//       the system will never be able to allocate that much memory.
 		return nil
 	}
 
-	text := make([]u16, n+1, allocator)
+	text := make([]u16, cast(int)n + 1, allocator)
 	if text == nil {
 		return nil
 	}
 
 	n1 := MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, cstr, c_int(s_length), raw_data(text), n)
-	if n1 == 0 {
+	if n1 <= 0 {
 		delete(text, allocator)
 		return nil
 	}
@@ -128,7 +132,7 @@ utf8_to_utf16_alloc :: proc(s: string, allocator := context.temp_allocator) -> [
 @(require_results)
 utf8_to_utf16_buf :: proc(buf: []u16, s: string) -> []u16 {
 	buf_length := len(buf)
-	if buf_length == 0 {
+	if buf_length < 1 {
 		return nil
 	}
 	s_length := len(s)
@@ -143,7 +147,7 @@ utf8_to_utf16_buf :: proc(buf: []u16, s: string) -> []u16 {
 		buf_length = cast(int)max(c_int)
 	}
 	elements_written := MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, raw_data(s), c_int(s_length), raw_data(buf), cast(c_int)buf_length)
-	if elements_written == 0 {
+	if elements_written <= 0 {
 		// Insufficient buffer size, empty input string, or invalid characters. Contents of the buffer may have been modified.
 		return nil
 	}
@@ -151,8 +155,9 @@ utf8_to_utf16_buf :: proc(buf: []u16, s: string) -> []u16 {
 	// To be consistent with utf8_to_utf16_alloc, the output string
 	// is null-terminated here in the buffer, even though the terminating null character
 	// is not part of the returned slice.
-	if buf_length < cast(int)elements_written + 1 {
+	if buf_length <= cast(int)elements_written {
 		// The terminating null character does not fit.
+		// Need at least a length of (elements_written+1).
 		return nil
 	}
 	buf[elements_written] = 0
