@@ -3420,7 +3420,9 @@ internal_substring :: proc(s: string, rune_start: int, rune_end: int) -> (sub: s
 			}
 			rune_i += 1
 		}
-		if !ok { return }
+		if !ok {
+			sub = sub[rune_i:]
+		}
 	}
 
 	if rune_end >= rune_start {
