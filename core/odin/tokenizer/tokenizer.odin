@@ -580,7 +580,6 @@ scan :: proc(t: ^Tokenizer) -> Token {
 					break check_keyword
 				}
 			} else {
-				// TODO(bill): Maybe have a hash table lookup rather than this linear search
 				for i in Token_Kind.B_Keyword_Begin ..= Token_Kind.B_Keyword_End {
 					if lit == tokens[i] {
 						kind = Token_Kind(i)
