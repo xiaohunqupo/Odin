@@ -838,7 +838,8 @@ gb_internal void write_type_to_canonical_string(TypeWriter *w, Type *type) {
 		} else {
 			type_writer_append_fmt(w, "%lld", type->BitSet.lower);
 			type_writer_append_fmt(w, CANONICAL_RANGE_OPERATOR);
-			type_writer_append_fmt(w, "%lld", type->BitSet.upper);
+			write_type_to_canonical_string(w, type->BitSet.elem);
+			type_writer_append_fmt(w, "(%lld)", type->BitSet.upper);
 		}
 		if (type->BitSet.underlying != nullptr) {
 			type_writer_appendc(w, ";");
