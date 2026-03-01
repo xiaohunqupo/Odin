@@ -2,7 +2,6 @@
 package odin_tokenizer
 
 import "base:intrinsics"
-import "base:runtime"
 import "core:fmt"
 import "core:unicode"
 import "core:unicode/utf8"
@@ -75,18 +74,15 @@ keyword_lut_init :: proc(lut: ^Keyword_LUT) -> bool {
 
 	max_keyword_size := 0
 
-	ti := runtime.type_info_base(type_info_of(Token_Kind))
-	e := ti.variant.(runtime.Type_Info_Enum)
-
 	for kind in (Token_Kind.B_Keyword_Begin+Token_Kind(1))..<Token_Kind.B_Keyword_End {
-		name := e.names[kind]
+		name := tokens[kind]
 
 		max_keyword_size = max(max_keyword_size, len(name))
 
 		hash := keyword_hash(name)
 
 		entry := &lut[hash & KEYWORD_LUT_MASK]
-		assert(entry.kind == .Invalid)
+		assert(entry.kind == .Invalid, name)
 		entry.hash = hash
 		entry.kind = kind
 		entry.name = name
